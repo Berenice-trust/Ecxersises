@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Valid form</title>
+    <style>
+        .SNoBorders {
+            /* Add any specific styles for .SNoBorders if needed */
+        }
+        .error-message {
+            color: red;
+        }
+        input[name="author"],
+        input[name="title"] {
+            width: 453px;
+        }
+        input[name="url"] {
+            width: 300px;
+        }
+        input[name="startdate"],
+        input[name="persons"] {
+            width: 80px;
+        }
+        input[name="email"] {
+            width: 200px;
+        }
+        select[name="rubric"] {
+            width: 204px;
+            margin-left: 2px;
+        }
+        textarea[name="article"] {
+            width: 608px;
+            height: 50px;
+        }
+        .SRadio8a {
+            /* Add any specific styles for .SRadio8a if needed */
+        }
+    </style>
+</head>
+<body>
+    
+    <p>
+        Для внесения вашего сайта в каталог, заполните форму:
+    </p>
+    <form name="INFO" method="POST" action="https://fe.it-academy.by/TestForm.php" target="_blank" novalidate>
+        <table class="SNoBorders">
+        <tbody>
+        <tr><td>Разработчики:</td><td><input type="text" name="author"><span class="error-message"></span></td></tr>
+        <tr><td>Название сайта:</td><td><input type="text" name="title"><span class="error-message"></span></td></tr>
+        <tr><td>URL сайта:</td><td><input type="text" name="url"><span class="error-message"></span></td></tr>
+        <tr><td>Дата запуска сайта:</td><td><input type="date" name="startdate"><span class="error-message"></span></td></tr>
+        <tr><td>Посетителей в сутки:</td><td><input type="text" name="persons"><span class="error-message"></span></td></tr>
+        <tr><td>E-mail для связи:</td><td><input type="text" name="email"><span class="error-message"></span></td></tr>
+        <tr><td>Рубрика каталога:</td><td>
+          <select name="rubric">
+          <option value="0">выбрать рубрику</option>
+          <option value="1">здоровье</option>
+          <option value="2">домашний уют</option>
+          <option value="3">бытовая техника</option>
+          </select><span class="error-message"></span>
+        </td></tr>
+        <tr><td>Размещение:</td><td>
+          <input type="radio" name="public" value="1"><span class="SRadio8a">бесплатное</span>
+          <input type="radio" name="public" value="2"><span class="SRadio8a">платное</span>
+          <input type="radio" name="public" value="3"><span class="SRadio8a">VIP</span>
+          <div class="error-message"></div>
+        </td></tr>
+        <tr><td style="padding: 2px 0 3px 3px">Разрешить&nbsp;отзывы:</td><td><input type="checkbox" name="comments"><span class="error-message"></span></td></tr>
+        <tr><td colspan="2">Описание сайта:<br>
+        <textarea name="article"></textarea><span class="error-message"></span></td></tr>
+        <tr><td><input type="submit" value="Опубликовать"></td><td><span id="error-message" class="error-message"></span></td></tr>
+        </tbody></table>
+    </form>
+
+    <script>
+        const formTag = document.forms.INFO;
+        formTag.addEventListener('submit', validateInfoForm, false);
+
+        const authorField = formTag.elements.author;
+        const titleField = formTag.elements.title;
+        const urlField = formTag.elements.url;
+        const startDateField = formTag.elements.startdate;
+        const personsField = formTag.elements.persons;
+        const emailField = formTag.elements.email;
+        const rubricField = formTag.elements.rubric;
+        const publicFields = formTag.elements.public;
+        const commentsField = formTag.elements.comments;
+        const articleField = formTag.elements.article;
+
+        const fieldsToValidate = [
+            { field: authorField, maxLength: 50, errorMessage: 'Введите пожалуйста имя разработчи��а не длиннее 50 символов!' },
+            { field: titleField, maxLength: 100, errorMessage: 'Введите пожалуйста название сайта не длиннее 100 символов!' },
+            { field: urlField, validate: validateUrlField, errorMessage: 'Введите пожалуйста корректный URL сайта!' },
+            { field: startDateField, validate: validateDateField, errorMessage: 'Введите пожалуйста дату запуска сайта!' },
+            { field: personsField, validate: validatePersonsField, errorMessage: 'Введите пожалуйста корректное число посетителей в сутки!' },
+            { field: emailField, validate: validateEmailField, errorMessage: 'Введите пожалуйста корректный E-mail для связи!' },
+            { field: rubricField, validate: validateRubricField, errorMessage: 'Пожалуйста, выберите рубрику!' },
+            { field: commentsField, validate: validateCommentsField, errorMessage: 'Пожалуйста, разрешите отзывы!' },
+            { field: articleField, minLength: 10, errorMessage: 'Описание сайта должно быть не менее 10 символов!' }
+        ];
+
+        fieldsToValidate.forEach(({ field, maxLength, minLength, validate, errorMessage }) => {
+            if (maxLength) {
+                field.addEventListener('blur', () => validateField(field, maxLength, errorMessage));
+            } else if (minLength) {
+                field.addEventListener('blur', () => validateMinLengthField(field, minLength, errorMessage));
+            } else if (validate) {
+                field.addEventListener('blur', () => validate(field, errorMessage));
+            }
+        });
+
+        rubricField.addEventListener('change', () => clearFieldError(rubricField));
+        commentsField.addEventListener('change', () => clearFieldError(commentsField));
+        publicFields[0].parentElement.addEventListener('change', () => clearPublicFieldError(publicFields));
+
+        function validateField(field, maxLength, errorMessageText) {
+            const errorMessage = field.nextElementSibling;
+            errorMessage.textContent = '';
+
+            const value = field.value.trim();
+            if (value === "" || value.length > maxLength) {
+                errorMessage.textContent = errorMessageText;
+                return false;
+            }
+            return true;
+        }
+
+        function validateMinLengthField(field, minLength, errorMessageText) {
+            const errorMessage = field.nextElementSibling;
+            errorMessage.textContent = '';
+
+            const value = field.value.trim();
+            if (value.length < minLength) {
+                errorMessage.textContent = errorMessageText;
+                return false;
+            }
+            return true;
+        }
+
+        function validateUrlField(field, errorMessageText) {
+            const errorMessage = field.nextElementSibling;
+            errorMessage.textContent = '';
+
+            const value = field.value.trim();
+            if (value === "" || !value.match(/^https?:\/\/[^\s$.?#].[^\s]*$/)) {
+                errorMessage.textContent = errorMessageText;
+                return false;
+            }
+            return true;
+        }
+
+        function validateDateField(field, errorMessageText) {
+            const errorMessage = field.nextElementSibling;
+            errorMessage.textContent = '';
+
+            const value = field.value.trim();
+            if (value === "") {
+                errorMessage.textContent = errorMessageText;
+                return false;
+            }
+            return true;
+        }
+
+        function validatePersonsField(field, errorMessageText) {
+            const errorMessage = field.nextElementSibling;
+            errorMessage.textContent = '';
+
+            const value = parseInt(field.value.trim());
+            if (isNaN(value) || value < 0) {
+                errorMessage.textContent = errorMessageText;
+                return false;
+            }
+            return true;
+        }
+
+        function validateEmailField(field, errorMessageText) {
+            const errorMessage = field.nextElementSibling;
+            errorMessage.textContent = '';
+
+            const value = field.value.trim();
+            if (value === "" || !value.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
+                errorMessage.textContent = errorMessageText;
+                return false;
+            }
+            return true;
+        }
+
+        function validateRubricField(field, errorMessageText) {
+            const errorMessage = field.nextElementSibling;
+            errorMessage.textContent = '';
+
+            if (field.value === "0") {
+                errorMessage.textContent = errorMessageText;
+                return false;
+            }
+            return true;
+        }
+
+        function validateCommentsField(field, errorMessageText) {
+            const errorMessage = field.nextElementSibling;
+            errorMessage.textContent = '';
+
+            if (!field.checked) {
+                errorMessage.textContent = errorMessageText;
+                return false;
+            }
+            return true;
+        }
+
+        function validatePublicField(fields) {
+            const errorMessage = fields[fields.length - 1].parentElement.querySelector('.error-message');
+            errorMessage.textContent = '';
+
+            let isChecked = false;
+            for (let i = 0; i < fields.length; i++) {
+                if (fields[i].checked) {
+                    isChecked = true;
+                    break;
+                }
+            }
+
+            if (!isChecked) {
+                errorMessage.textContent = 'Пожалуйста, выберите вариант размещения!';
+                return false;
+            }
+            return true;
+        }
+
+        function clearFieldError(field) {
+            const errorMessage = field.nextElementSibling;
+            errorMessage.textContent = '';
+        }
+
+        function clearPublicFieldError(fields) {
+            const errorMessage = fields[fields.length - 1].parentElement.querySelector('.error-message');
+            errorMessage.textContent = '';
+        }
+
+        function validateInfoForm(eo) {
+            eo = eo || window.event;
+            const errorMessage = document.getElementById('error-message');
+            errorMessage.textContent = '';
+
+            let isValid = true;
+            let firstInvalidField = null;
+
+            fieldsToValidate.forEach(({ field, maxLength, minLength, validate, errorMessage }) => {
+                let isValidField;
+                if (maxLength) {
+                    isValidField = validateField(field, maxLength, errorMessage);
+                } else if (minLength) {
+                    isValidField = validateMinLengthField(field, minLength, errorMessage);
+                } else if (validate) {
+                    isValidField = validate(field, errorMessage);
+                }
+
+                if (!isValidField) {
+                    isValid = false;
+                    if (!firstInvalidField) firstInvalidField = field;
+                }
+            });
+
+            if (!validatePublicField(publicFields)) {
+                isValid = false;
+                if (!firstInvalidField) firstInvalidField = publicFields[0];
+            }
+
+            if (!isValid) {
+                eo.preventDefault();
+                if (firstInvalidField) firstInvalidField.focus();
+            }
+        }
+    </script>
+</body>
+</html>

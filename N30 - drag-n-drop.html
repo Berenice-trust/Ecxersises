@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html><head>
+    <meta charset="UTF-8">
+    <title>drag&amp;drop</title>
+  </head>
+  <body style="min-height: 100vh">
+<img src="http://fe.it-academy.by/Sites/0000007/sax.jpg">
+<img src="http://fe.it-academy.by/Sites/0000007/Yin_and_Yang.png" width="100">
+<img src="http://fe.it-academy.by/Sites/0000007/Man-and-woman.png" width="150">
+<img src="http://fe.it-academy.by/Sites/0000007/No_smoking.png" style="padding-left: 50px">
+
+<script>
+    window.addEventListener('load', () => {
+                    //нахожу все картинк    и, тут будет коллекция
+        const images = document.querySelectorAll('img');
+
+                         // Сохраняю начальные позиции
+        const positions = Array.from(images).map(img => { //массив координат left и top из колекции картинок
+            const rect = img.getBoundingClientRect();
+            return { left: rect.left , top: rect.top  }; //  скролл (+ window.scrollX и window.scrollY)
+        });
+
+        // Устанавливаю позиции после загрузки страницы
+        images.forEach((img, index) => {
+            img.style.position = 'absolute';
+            img.style.left = positions[index].left + 'px'; // устанавливаю начальное смещение слева
+            img.style.top = positions[index].top + 'px'; // устанавливаю начальное смещение сверху
+
+            img.addEventListener('mousedown', onMouseDown); //при нажатии ЛКМ вызывается функция
+            img.addEventListener('dragstart', function(eo) {
+                eo.preventDefault(); // отменю базовое поведение на перетаскивание
+            });
+            img.style.cursor = 'grab'; // курсор в виде руки
+        });
+    });
+
+    function onMouseDown(eo) {
+        eo = eo || window.event;
+        const img = eo.target; //получаю ту картинку на которую произошел mousedown
+
+        let offsetX = eo.clientX - img.getBoundingClientRect().left; //смещения относительно левого края картинки
+        let offsetY = eo.clientY - img.getBoundingClientRect().top;
+
+        img.style.zIndex = 1000; // устанавливаю высокий z-index, чтобы изображение было поверх других элементов
+        img.style.transform = 'scale(1.2)'; // чуть увеличу размер при перетаскивании
+        img.style.cursor = 'grabbing'; //нурсор захват
+
+        document.body.append(img); //добавляю в конец боди, теперь оно последнее в списке и будет поверх всех
+        
+        moveAt(eo.pageX, eo.pageY); // сразу перемещаю изображение на позицию курсора, для плавности
+
+        //функция сдвигает картинку за курсором, учитывая смещение
+        function moveAt(pageX, pageY) {
+            img.style.left = pageX - offsetX + 'px';
+            img.style.top = pageY - offsetY + 'px';
+        }
+
+        // обработчик события при движении мыши, когда меняются координаты вызываюмся функция moveAt
+        function onMouseMove(eo) {
+            moveAt(eo.pageX, eo.pageY);
+        }
+
+        //при отпускании мыши
+        function onMouseUp() {
+            document.removeEventListener('mousemove', onMouseMove); // удалю событие движения мыши
+            img.style.transform = 'scale(1)'; // возвращаю изначальный размер
+            img.style.cursor = 'grab'; // курсор руку
+            img.removeEventListener('mouseup', onMouseUp); // удаляю событие отпускания мыши
+        }
+
+        document.addEventListener('mousemove', onMouseMove);
+        img.addEventListener('mouseup', onMouseUp);
+    }
+</script>
+
+  
+
+</body></html>

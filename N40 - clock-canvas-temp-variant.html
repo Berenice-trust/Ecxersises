@@ -1,0 +1,215 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clock - Canvas Temp</title>
+    <style>
+        :root {
+            --accent-color: brown;
+            --base-color: black;
+            --background-color: white;
+        }
+
+        .clock {
+            position: relative;
+            margin: 50px auto;
+            width: fit-content;
+            display: none;
+        }
+
+        .digital-clock {
+            position: absolute;
+            top: 30%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-weight: bold;
+            opacity: 0.7;
+        }
+
+        h1 {
+            text-align: center;
+            margin-top: 30px;
+            border-bottom: 2px solid var(--accent-color);
+        }
+
+        .input-field {
+            font-size: 1.2rem;
+            width: 200px;
+            display: inline-block;
+            background-color: rgb(240, 237, 237);
+            border-radius: 3px;
+            border: var(--base-color) solid 2px;
+            padding-left: 5px;
+        }
+
+        .input-field:focus {
+            outline: none;
+            border-color: var(--accent-color);
+        }
+
+        .input-container {
+            text-align: center;
+            margin-top: 30px;
+        }
+
+        .input-container span {
+            font-size: 1.3rem;
+            margin: auto 10px;
+        }
+
+        .button-create {
+            width: 120px;
+            height: 35px;
+            font-weight: bold;
+            font-size: 1rem;
+            display: block;
+            margin: 30px auto;
+            background-color: rgba(0, 0, 0, 0.833);
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <h1>Current time</h1>
+    <div class="input-container">
+        <span>Size (400px)</span>
+        <input type="number" id="clock-input" class="input-field" placeholder="200 - 800 pixels" min="200" max="800">
+        <span>px</span>
+    </div>
+    <button id="button-create" class="button-create">Create Clock</button>
+
+    <div id="clock" class="clock">
+        <canvas id="clock-canvas"></canvas>
+        <div id="digital-clock" class="digital-clock"></div>
+    </div>
+
+    <script>
+        const DEGREE_PER_HOUR = 360 / 12;
+        const DEGREE_TO_RADIAN = Math.PI / 180;
+
+        const clockInput = document.getElementById('clock-input');
+        const createButton = document.getElementById('button-create');
+        const clock = document.getElementById('clock');
+        const digitalClock = document.getElementById('digital-clock');
+        const canvas = document.getElementById('clock-canvas');
+        const ctx = canvas.getContext('2d'); //context
+
+        function createClock() {
+            const inputSize = (parseInt(clockInput.value) >= 200 && parseInt(clockInput.value) <= 800) ? parseInt(clockInput.value) : 400; // Default size if input is empty or invalid
+            const baseSize = 400;
+            const scaleFactor = inputSize / baseSize;
+            const radius = baseSize / 2;
+            const markRadius = radius * 0.82; //distance between center and hour marks
+
+            // Get the background color from CSS variable
+            const backgroundColor = getComputedStyle(document.documentElement).getPropertyValue('--background-color').trim();
+            const baseColor = getComputedStyle(document.documentElement).getPropertyValue('--base-color').trim();
+            const accentColor = getComputedStyle(document.documentElement).getPropertyValue('--accent-color').trim();
+
+            // Set canvas size
+            canvas.width = inputSize;
+            canvas.height = inputSize;
+
+            // Draw static elements (clock face and hour marks)
+            drawClockFace(baseSize, radius, markRadius, backgroundColor, baseColor, scaleFactor);
+
+            // Set the font size of the digital clock based on the size
+            digitalClock.style.fontSize = `${inputSize * 0.09}px`;
+
+            // Display the clock and hide input/button
+            clock.style.display = 'block';
+            document.querySelector('.input-container').style.display = 'none';
+            createButton.style.display = 'none';
+
+            // Rotate hands every second
+            function rotateHands() {
+                const now = new Date();
+                const hours = now.getHours();
+                const minutes = now.getMinutes();
+                const seconds = now.getSeconds();
+                const milliseconds = now.getMilliseconds();
+
+                // Clear only the area where the hands are drawn
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                drawClockFace(baseSize, radius, markRadius, backgroundColor, baseColor, scaleFactor);
+
+                // Draw clock hands
+                const hourAngle = ((hours % 12) * DEGREE_PER_HOUR) + ((DEGREE_PER_HOUR / 60) * minutes);
+                const minuteAngle = (minutes * (360 / 60));
+                const secondAngle = (seconds * (360 / 60));
+
+                drawHand(radius, radius - baseSize * 0.25, baseSize * 0.03, baseColor, hourAngle, scaleFactor);
+                drawHand(radius, radius - baseSize * 0.35, baseSize * 0.02, baseColor, minuteAngle, scaleFactor);
+                drawHand(radius, radius - baseSize * 0.05, baseSize * 0.01, accentColor, secondAngle, scaleFactor); // Increase width of second hand
+
+                // Draw center dot
+                ctx.fillStyle = baseColor;
+                ctx.beginPath();
+                ctx.arc(radius * scaleFactor, radius * scaleFactor, baseSize * 0.03 * scaleFactor, 0, 2 * Math.PI);
+                ctx.fill();
+
+                // Update digital clock display
+                digitalClock.textContent = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+                console.log(`Current time: ${digitalClock.textContent}`);
+                // Calculate the delay for the next update
+                const delay = 1010 - milliseconds; //correcting the delay
+                setTimeout(rotateHands, delay);
+            }
+
+            // Start updating the clock
+            rotateHands();
+        }
+
+        function drawClockFace(size, radius, markRadius, backgroundColor, baseColor, scaleFactor) {
+            ctx.fillStyle = backgroundColor;
+            ctx.strokeStyle = baseColor;
+            ctx.lineWidth = size * 0.025 * scaleFactor;
+            ctx.beginPath();
+            ctx.arc(radius * scaleFactor, radius * scaleFactor, (radius - 10) * scaleFactor, 0, 2 * Math.PI);
+            ctx.fill();
+            ctx.stroke();
+
+            ctx.fillStyle = baseColor;
+            for (let i = 1; i <= 12; i++) {
+                const angle = (i * DEGREE_PER_HOUR - 90) * DEGREE_TO_RADIAN;
+                const x = radius + Math.cos(angle) * markRadius;
+                const y = radius + Math.sin(angle) * markRadius;
+
+                ctx.beginPath();
+                ctx.arc(x * scaleFactor, y * scaleFactor, radius * 0.1 * scaleFactor, 0, 2 * Math.PI);
+                ctx.fill();
+
+                ctx.fillStyle = backgroundColor;
+                ctx.font = `${size * 0.06 * scaleFactor}px sans-serif`;
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(i, x * scaleFactor, y * scaleFactor);
+                ctx.fillStyle = baseColor;
+            }
+        }
+
+        // Utility function to draw clock hands
+        function drawHand(center, length, width, color, angle, scaleFactor) {
+            ctx.strokeStyle = color;
+            ctx.lineWidth = width * scaleFactor;
+            ctx.lineCap = 'round';
+            ctx.beginPath();
+            ctx.moveTo(center * scaleFactor, center * scaleFactor);
+            ctx.lineTo(center * scaleFactor + Math.cos((angle - 90) * DEGREE_TO_RADIAN) * length * scaleFactor, center * scaleFactor + Math.sin((angle - 90) * DEGREE_TO_RADIAN) * length * scaleFactor);
+            ctx.stroke();
+        }
+
+        // Event for "Create Clock" button
+        createButton.addEventListener('click', createClock);
+
+        // Event for Enter key press in the input field
+        clockInput.addEventListener('keypress', (event) => {
+            if (event.key === 'Enter') {
+                createClock();
+            }
+        });
+    </script>
+</body>
+</html>

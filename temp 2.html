@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clock - DOM</title>
+
+    <style>
+          :root {
+            --accent-color: brown;
+            --base-color: black;
+            --background-color: white;
+        }
+
+        .clock {
+            position: relative;
+            border: 8px solid var(--base-color);
+            border-radius: 50%;
+            margin: 50px auto;
+            background: var(--background-color);
+            display: none;
+        }
+
+        .clock-face {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+        }
+
+        .center-dot {
+            position: absolute;
+            background: var(--base-color);
+            border-radius: 50%;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .hour-mark {
+            position: absolute;
+            background: var(--base-color);
+            border-radius: 50%;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transform: translate(-50%, -50%);
+        }
+
+        .hour-hand, .minute-hand, .second-hand {
+            position: absolute;
+            background: var(--base-color);
+            transform-origin: 0% 100%; 
+            top: 0%;
+            left: 50%;
+        }
+
+        .hour-hand {
+            border-radius: 10px;
+            top: 22%;
+        }
+
+        .minute-hand {
+            border-radius: 10px;
+            top: 13%;
+            
+        }
+
+        .second-hand {
+            background: var(--accent-color);
+        }
+
+        .digital-clock {
+            position: absolute;
+            top: 30%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-weight: bold;
+        }
+
+        h1 {
+            text-align: center;
+            margin-top: 30px;
+            border-bottom: 2px solid var(--accent-color);
+        }
+
+        .input-field {
+            font-size: 1.2rem;
+            width: 200px;
+            display: inline-block;
+            background-color: rgb(240, 237, 237);
+            border-radius: 3px;
+            border: var(--base-color) solid 2px;
+            padding-left: 5px;
+        }
+
+        .input-field:focus {
+            outline: none;
+            border-color: var(--accent-color);
+        }
+
+        .input-container {
+            text-align: center;
+            margin-top: 30px;
+        }
+
+        .input-container span {
+            font-size: 1.3rem;
+            margin: auto 10px;
+        }
+
+        .button-create {
+            width: 120px;
+            height: 35px;
+            font-weight: bold;
+            font-size: 1rem;
+            display: block;
+            margin: 30px auto;
+            background-color: rgba(0, 0, 0, 0.833);
+            color: white;
+        }
+    </style>
+
+    
+  </head>
+<body>
+    <h1>Current time</h1>
+    <div class="input-container">
+        <span>Size</span>
+        <input type="number" id="clock-input" class="input-field" placeholder="200 - 800 pixels" min="200" max="800">
+        <span>px</span>
+    </div>
+    <button id="button-create" class="button-create">Create Clock</button>
+
+    <div id="clock" class="clock">
+         <div id="digital-clock" class="digital-clock"></div>
+        <!--<div id="hour-hand" class="hour-hand"></div>
+        <div id="minute-hand" class="minute-hand"></div>
+        <div id="second-hand" class="second-hand"></div>
+        <div id="clock-face" class="clock-face">
+            <div id="center-dot" class="center-dot"></div> -->
+            <!-- Hour marks will be added here -->
+        <!-- </div> -->
+    </div>
+
+    <script>
+         // Constants
+         const DEGREE_PER_HOUR = 360 / 12; // 1 hour is 30 degrees (360 degrees / 12 hours)
+        const DEGREE_TO_RADIAN = Math.PI / 180; // Conversion degrees to radians
+
+        // Get elements from the DOM
+        // const clock = document.getElementById('clock');
+        // const hourHand = document.getElementById('hour-hand'); 
+        // const minuteHand = document.getElementById('minute-hand'); 
+        // const secondHand = document.getElementById('second-hand'); 
+        // const digitalClock = document.getElementById('digital-clock'); 
+        // const centerDot = document.getElementById('center-dot');
+        // const clockFace = document.querySelector('.clock-face');
+
+        const clockInput = document.getElementById('clock-input'); 
+        const inputContainer = document.querySelector('.input-container'); 
+        const buildButton = document.getElementById('button-create'); 
+        const clock = document.getElementById('clock');
+       
+       
+       
+        // Function to create the clock
+        function createClock() {
+            const size = parseInt(clockInput.value); //from the input field
+
+            if (size >= 200 && size <= 800) { 
+
+                clock.innerHTML = ''; // Clear previous clock
+                clock.style.display = 'block'; // Make clock visible
+
+
+                radius = size / 2;
+                const markRadius = radius * 0.85; // Distance for hour marks
+                //const handBase = radius * 0.1; // Offset for hand base
+
+                // Create SVG element
+                const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+                        svg.setAttribute('width', size);
+                        svg.setAttribute('height', size);
+                        svg.setAttribute('viewBox', `0 0 ${size} ${size}`);
+                        // svg.style.border = '1px solid black';
+
+                 // Create clock face
+                const clockFace = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                        clockFace.setAttribute('cx', radius);
+                        clockFace.setAttribute('cy', radius);
+                        clockFace.setAttribute('r', radius - 10);
+                        clockFace.setAttribute('fill', 'white');
+                        clockFace.setAttribute('stroke', 'black');
+                        clockFace.setAttribute('stroke-width', size * 0.02);
+                        svg.appendChild(clockFace);
+
+                 // Create hour marks
+                for (let i = 1; i <= 12; i++) {
+                    const angle = (i * DEGREE_PER_HOUR - 90) * DEGREE_TO_RADIAN; // Adjusted for top-center start
+                    const x = radius + Math.cos(angle) * markRadius;
+                    const y = radius + Math.sin(angle) * markRadius;
+
+                    const hourMark1 = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                    hourMark1.setAttribute('cx', x);
+                    hourMark1.setAttribute('cy', y);
+                    hourMark1.setAttribute('r', radius * 0.1);
+
+                    // hourMark.setAttribute('text-anchor', 'middle');
+                    hourMark1.setAttribute('dominant-baseline', 'middle');
+                    //hourMark1.setAttribute('font-size', size * 0.1); // Scaled font size
+                hourMark1.setAttribute('fill', 'black'); // Цвет текста
+                    
+                   
+                    svg.appendChild(hourMark1);
+
+                    const hourMark = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                    hourMark.setAttribute('x', x);
+                    hourMark.setAttribute('y', y);
+                    hourMark.setAttribute('text-anchor', 'middle');
+                    hourMark.setAttribute('dominant-baseline', 'middle');
+                    hourMark.setAttribute('font-size', size * 0.06); // Scaled font size
+                hourMark.setAttribute('fill', 'white'); // Цвет текста
+                    
+                    hourMark.textContent = i;
+                    svg.appendChild(hourMark);
+                }
+
+                 // Create clock hands.  ??????
+        const hourHand = createHand(radius, radius - size * 0.3, size * 0.03, 'black');
+        const minuteHand = createHand(radius, radius - size * 0.4, size * 0.02, 'black');
+        const secondHand = createHand(radius, radius - size * 0.45, size * 0.005, 'red');
+
+        svg.appendChild(hourHand);
+        svg.appendChild(minuteHand);
+        svg.appendChild(secondHand);
+
+        // Create center dot
+        const centerDot = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        centerDot.setAttribute('cx', radius);
+        centerDot.setAttribute('cy', radius);
+        centerDot.setAttribute('r', size * 0.02); // Size of the center dot
+        centerDot.setAttribute('fill', 'black');
+        svg.appendChild(centerDot);
+
+        // Append SVG to the container
+        clock.appendChild(svg);
+
+        // Rotate hands every second
+        function rotateHands() {
+            const now = new Date();
+            const hours = now.getHours();
+            const minutes = now.getMinutes();
+            const seconds = now.getSeconds();
+
+            const hourAngle = ((hours % 12) * 30) + (minutes / 2); // 30° per hour, 0.5° per minute
+            const minuteAngle = minutes * 6; // 6° per minute
+            const secondAngle = seconds * 6; // 6° per second
+
+            hourHand.setAttribute('transform', `rotate(${hourAngle} ${radius} ${radius})`);
+            minuteHand.setAttribute('transform', `rotate(${minuteAngle} ${radius} ${radius})`);
+            secondHand.setAttribute('transform', `rotate(${secondAngle} ${radius} ${radius})`);
+        }
+
+
+
+
+                // Rotate the clock hands initially and then every second
+                rotateHands(); 
+                setInterval(rotateHands, 1000); 
+            } else {
+                alert('Please enter a size between 200 and 800.'); 
+            }
+        }
+
+
+
+// Utility function to create clock hands
+function createHand(x, y, width, color) {
+    const hand = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+    hand.setAttribute('x1', x);
+    hand.setAttribute('y1', x);
+    hand.setAttribute('x2', x);
+    hand.setAttribute('y2', y);
+    hand.setAttribute('stroke', color);
+    hand.setAttribute('stroke-width', width);
+    hand.setAttribute('stroke-linecap', 'round');
+    return hand;
+}
+
+
+
+       
+
+
+
+
+        // Event for "Create Clock" button
+        buildButton.addEventListener('click', createClock);
+
+        // Event for Enter key press in the input field
+        clockInput.addEventListener('keypress', (event) => {
+            if (event.key === 'Enter') {
+                createClock();
+            }
+        });
+
+        
+        // rotateHands();
+    </script>
+</body>
+</html>

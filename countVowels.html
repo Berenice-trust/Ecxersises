@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>countVowelLetters</title>
+</head>
+<body>
+    <script>
+        function countVowelLetters(str) {
+            // создадим массив из символов, которые надо считать
+            const vowelLetters = ['а', 'е', 'ё', 'и', 'о', 'у', 'ы', 'э', 'ю', 'я', 'А', 'Е', 'Ё', 'И', 'О', 'У', 'Ы', 'Э', 'Ю', 'Я'];
+            let count = 0; // счетчик глассных
+            
+            for (let i = 0; i < str.length; i++) {
+                const char = str[i]; //текущий символ
+                
+                if (vowelLetters.includes(char)) { //проверяет есть ли текущий символ в массиве нужных
+                    count++; // если true -> увеличиваем
+                }
+            }
+            
+             console.log(`Количество гласных = ${count}`);
+        }
+        countVowelLetters("Пришла зима, запахло...");
+        countVowelLetters("Ghbdtn, z r dfv bp Hjccbb");
+        countVowelLetters("длинношеее");
+        countVowelLetters("Не будете ли Вы так любезны, Иван, передать мне блокнот и «Известия»");
+        countVowelLetters("Архангел Уриил");
+
+    </script>
+    
+</body>
+</html>
+

@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Анкета</title>
+</head>
+<body>
+    <h1>Анкета пользователя</h1>
+
+    <script>
+        let lastName, firstName, fatherName, age, isMale;
+
+        do {
+            lastName = prompt("Введите вашу фамилию (буквами кирилицы):");
+            firstName = prompt("Введите ваше имя (буквами кирилицы):");
+            fatherName = prompt("Введите ваше отчество (буквами кирилицы):");
+
+                            // check input
+            if (!lastName || !firstName || !fatherName) {
+                alert("Пожалуйста! Заполните ВСЕ поля буквами русского алфавита!");
+            } else if (!/^[а-яА-ЯёЁ]+$/.test(lastName) || !/^[а-яА-ЯёЁ]+$/.test(firstName) || !/^[а-яА-ЯёЁ]+$/.test(fatherName)) {
+                // check kirillic letters
+                alert("Имя, фамилия и отчество должны содержать только БУКВЫ русского алфавита.");
+            }
+        } while (!lastName || !firstName || !fatherName || !(/^[а-яА-ЯёЁ]+$/.test(lastName) && /^[а-яА-ЯёЁ]+$/.test(firstName) && /^[а-яА-ЯёЁ]+$/.test(fatherName)));
+            //do this while all fields are empty or not kirillic
+
+
+                            // input age
+        do {
+            age = prompt("Сколько вам полных лет (целое положительное число):");
+
+                        // check input age (may be so much checks)
+            if (!age || isNaN(age) || (parseInt(age) != parseFloat(age)) || parseInt(age) < 0 || parseInt(age) > 120) {
+                alert("Возраст должен быть адекватным неотрицательным целым числом.");
+            }
+        } while (!age || isNaN(age) || (parseInt(age) != parseFloat(age)) || parseInt(age) < 0 || parseInt(age) > 120);
+
+                        //input gender
+            isMale = confirm("Ваш пол - мужской? (Ok - муж, cancel - жен)"); //if ок - true (male)
+        
+        // возраст в днях
+        //let isAdult = (age >= 18); 
+        // на пенсии ли
+        //let isRetired = (age >= 60);
+        // let gender = isMale ? "мужской" : "женский";
+
+        // create message (string)
+       
+        // let message = "Ваше ФИО: " + lastName + " " + firstName + " " + fatherName + "\n" +
+        //     "Ваш возраст в годах: " + age + "\n" +
+        //     "Ваш возраст в днях: " + (age * 365) + "\n" +
+        //     "Через 5 лет вам будет: " + (parseInt(age) + 5) + "\n" +
+        //     "Ваш пол: " + (isMale ? "мужской" : "женский") + "\n" +
+        //     "Вы на пенсии: " + (isMale ? (age >= 65 ? 'да' : 'нет') : (age >= 60 ? 'да' : 'нет'));
+
+            let message = `Ваше ФИО:  ${lastName} ${firstName} ${fatherName}
+            Ваш возраст в годах: ${age}
+            Ваш возраст в днях: ${age * 365}
+            Через 5 лет вам будет: ${parseInt(age) + 5}
+            Ваш пол: ${isMale ? "мужской" : "женский"}
+            Вы на пенсии: ${isMale ? (age >= 65 ? 'да' : 'нет') : (age >= 60 ? 'да' : 'нет')}`;
+            //65 for male, 60 for female
+
+        // show message 
+        alert(message);
+
+
+    </script>
+</body>
+</html>
