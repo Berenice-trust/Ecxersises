@@ -1,42 +1,49 @@
+// Class to manage local storage for objects
 class ObjStorageClass {
     constructor(lskey) {
-        this.lskey = lskey;
-        this.storage = {};
-        this.loadChanges();
+        this.lskey = lskey; // Key to identify the storage in localStorage
+        this.storage = {}; // Object to hold the data
+        this.loadChanges(); // Load existing data from localStorage
     }
 
+    // Save the current state of storage to localStorage
     saveChanges() {
         localStorage[this.lskey] = JSON.stringify(this.storage);
     }
 
+    // Load the state of storage from localStorage
     loadChanges() {
         if (localStorage[this.lskey]) {
             try {
                 this.storage = JSON.parse(localStorage[this.lskey]);
             } catch (er) {
-                console.error("Error", er);
+                console.error("Error", er); // Log any errors during parsing
             }
         }
     }
 
+    // Add a new key-value pair to the storage
     addValue(key, value) {
         this.storage[key] = value;
-        this.saveChanges();
+        this.saveChanges(); // Save changes to localStorage
     }
 
+    // Retrieve a value by key from the storage
     getValue(key) {
         return this.storage[key];
     }
 
+    // Delete a key-value pair from the storage
     deleteValue(key) {
         if (this.storage.hasOwnProperty(key)) {
             delete this.storage[key];
-            this.saveChanges();
+            this.saveChanges(); // Save changes to localStorage
             return true;
         }
         return false;
     }
 
+    // Get all keys from the storage
     getKeys() {
         return Object.keys(this.storage);
     }
@@ -44,9 +51,11 @@ class ObjStorageClass {
 
 export { ObjStorageClass };
 
+// Create instances for storing cocktail and dish recipes
 let coctailsStorage = new ObjStorageClass('coctailsStorage');
 let dishesStorage = new ObjStorageClass('dishesStorage');
 
+// Add some initial cocktail recipes to the storage
 coctailsStorage.addValue("Маргарита", {
     isAlcoholic: true,
     ingredients: [
@@ -58,56 +67,57 @@ coctailsStorage.addValue("Маргарита", {
 });
 
 coctailsStorage.addValue("Пеликан", {
-isAlcoholic: false,
-ingredients: [
-    { name: "Гренадин Monin", amount: "10мл" },
-    { name: "Клубничный сироп Monin", amount: "10мл" },
-    { name: "Персиковый сок", amount: "150мл" },
-    { name: "Лимонный сок", amount: "15мл" },
-    { name: "Банан", amount: "110г" },
-    { name: "Клубника", amount: "50г" },
-    { name: "Дробленый лед", amount: "60г" }
-],
-recipe: "Положи в блендер очищенную и нарезанную половинку банана и клубнику 2 ягоды. Налей лимонный сок 15 мл, гренадин 10 мл, клубничный сироп 10 мл и персиковый сок 150 мл. Добавь в блендер совок дробленого льда и взбей. Перелей в хайбол. Укрась кружком банана и половинкой клубники на коктейльной шпажке."
+    isAlcoholic: false,
+    ingredients: [
+        { name: "Гренадин Monin", amount: "10мл" },
+        { name: "Клубничный сироп Monin", amount: "10мл" },
+        { name: "Персиковый сок", amount: "150мл" },
+        { name: "Лимонный сок", amount: "15мл" },
+        { name: "Банан", amount: "110г" },
+        { name: "Клубника", amount: "50г" },
+        { name: "Дробленый лед", amount: "60г" }
+    ],
+    recipe: "Положи в блендер очищенную и нарезанную половинку банана и клубнику 2 ягоды. Налей лимонный сок 15 мл, гренадин 10 мл, клубничный сироп 10 мл и персиковый сок 150 мл. Добавь в блендер совок дробленого льда и взбей. Перелей в хайбол. Укрась кружком банана и половинкой клубники на коктейльной шпажке."
 });
 
 coctailsStorage.addValue("Мохито", {
-isAlcoholic: true,
-ingredients: [
-    { name: "Ром", amount: "50мл" },
-    { name: "Лайм", amount: "1 шт." },
-    { name: "Мелисса (мелисса)", amount: "10 листочков" },
-    { name: "Сахар", amount: "2 чайные ложки" },
-    { name: "Сода", amount: "150мл" },
-    { name: "Лед в кубиках", amount: "по вкусу" }
-],
-recipe: "Разрежьте лайм и выжмите сок. Добавьте сахар и разомните вместе с лаймом. Положите листья мелиссы и слегка помните их. Добавьте ром и лед. Залейте содовой и перемешайте. Подавайте с соломинкой."
+    isAlcoholic: true,
+    ingredients: [
+        { name: "Ром", amount: "50мл" },
+        { name: "Лайм", amount: "1 шт." },
+        { name: "Мелисса (мелисса)", amount: "10 листочков" },
+        { name: "Сахар", amount: "2 чайные ложки" },
+        { name: "Сода", amount: "150мл" },
+        { name: "Лед в кубиках", amount: "по вкусу" }
+    ],
+    recipe: "Разрежьте лайм и выжмите сок. Добавьте сахар и разомните вместе с лаймом. Положите листья мелиссы и слегка помните их. Добавьте ром и лед. Залейте содовой и перемешайте. Подавайте с соломинкой."
 });
 
 coctailsStorage.addValue("Космополитан", {
-isAlcoholic: true,
-ingredients: [
-    { name: "Водка", amount: "45мл" },
-    { name: "Клюквенный сок", amount: "30мл" },
-    { name: "Ликер Triple Sec", amount: "15мл" },
-    { name: "Сок лайма", amount: "15мл" },
-    { name: "Лед", amount: "по вкусу" }
-],
-recipe: "В шейкере смешайте водку, клюквенный сок, ликер Triple Sec и сок лайма. Добавьте лед и хорошо встряхните. Процедите в охлажденный бокал для коктейлей. Украсьте цедрой лайма или вишней."
+    isAlcoholic: true,
+    ingredients: [
+        { name: "Водка", amount: "45мл" },
+        { name: "Клюквенный сок", amount: "30мл" },
+        { name: "Ликер Triple Sec", amount: "15мл" },
+        { name: "Сок лайма", amount: "15мл" },
+        { name: "Лед", amount: "по вкусу" }
+    ],
+    recipe: "В шейкере смешайте водку, клюквенный сок, ликер Triple Sec и сок лайма. Добавьте лед и хорошо встряхните. Процедите в охлажденный бокал для коктейлей. Украсьте цедрой лайма или вишней."
 });
 
 coctailsStorage.addValue("Пина Колада", {
-isAlcoholic: true,
-ingredients: [
-    { name: "Ром", amount: "60мл" },
-    { name: "Ананасовый сок", amount: "90мл" },
-    { name: "Кокосовое молоко", amount: "30мл" },
-    { name: "Лед", amount: "по вкусу" },
-    { name: "Ванильное мороженое", amount: "1-2 шарика" }
-],
-recipe: "В блендере смешайте ром, ананасовый сок, кокосовое молоко и лед. Взбейте до получения однородной массы. Добавьте мороженое и взбейте ещё раз до образовани�� кремовой текстуры. Перелейте в бокал и украсьте кусочком ананаса и вишней."
+    isAlcoholic: true,
+    ingredients: [
+        { name: "Ром", amount: "60мл" },
+        { name: "Ананасовый сок", amount: "90мл" },
+        { name: "Кокосовое молоко", amount: "30мл" },
+        { name: "Лед", amount: "по вкусу" },
+        { name: "Ванильное мороженое", amount: "1-2 шарика" }
+    ],
+    recipe: "В блендере смешайте ром, ананасовый сок, кокосовое молоко и лед. Взбейте до получения однородной массы. Добавьте мороженое и взбейте ещё раз до образования кремовой текстуры. Перелейте в бокал и украсьте кусочком ананаса и вишней."
 });
 
+// Add some initial dish recipes to the storage
 dishesStorage.addValue("Цезарь", {
     ingredients: [
         { name: "Куриное филе", amount: "200г" },
