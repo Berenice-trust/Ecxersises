@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Cocktails</title>
   <style>
-    /* Basic styles for the page */
     body {
       font-family: 'Arial', sans-serif;
       background: #1c1c1c;
@@ -55,11 +54,11 @@
       box-shadow: 0 0 15px rgba(0, 0, 0, 0.8);
       color: #ecf0f1;
       text-align: left;
-      display: none; /* initially hidden */
+      display: none; 
       margin-bottom: 20px; 
     }
     .show {
-      display: block; /* Show when the class 'show' is added */
+      display: block; 
     }
     h2 {
       color: #e6007e;
@@ -77,6 +76,9 @@
       margin: 8px 0;
       font-size: 1.1em;
     }
+    /* p {
+      color: white;
+    } */
     .coctails-list ul {
       list-style-type: none;
       padding: 0;
@@ -123,9 +125,9 @@
         <div class="output dishes-output"></div>
     </div>
 
-    <!-- JavaScript logic -->
+                                    <!-- JS   -->
     <script type="module">
-        import { ObjStorageClass } from './N53 - LocStorage.js';
+        import { ObjStorageClass } from './N53 - LocStorage.js'; // Import the class with local storage from file N53 - LocStorage.js (module)
 
         // Create instances for storing cocktail and dish recipes
         const coctailsStorage = new ObjStorageClass('coctailsStorage');
@@ -155,7 +157,8 @@
             listContainer.classList.add('show');
         }
 
-        // Event handlers for drinks
+                                        // Event handlers for drinks 
+        // button Add Drink Recipe
         document.getElementById('add-drink-recipe').onclick = function() {
             let name = prompt("Введите название напитка:");
             if (!name) return;
@@ -184,6 +187,7 @@
             updateOutput("<p>Рецепт добавлен.</p>", '.drinks-output');
         };
 
+        // button Get Drink Recipe
         document.getElementById('get-drink-recipe').onclick = function() {
             let name = prompt("Введите название напитка:");
             let recipe = coctailsStorage.getValue(name);
@@ -204,6 +208,7 @@
             }
         };
 
+        // button Delete Drink Recipe
         document.getElementById('delete-drink-recipe').onclick = function() {
             let name = prompt("Введите название напитка:");
             let result = coctailsStorage.deleteValue(name);
@@ -215,12 +220,15 @@
             }
         };
 
+        // button show list of Drinks
         document.getElementById('list-drinks').onclick = function() {
             let keys = coctailsStorage.getKeys();
             updateList(keys, '.drinks-list');
         };
 
-        // Event handlers for dishes
+
+
+                                    // Event handlers for dishes
         document.getElementById('add-dish-recipe').onclick = function() {
             let name = prompt("Введите название блюда:");
             if (!name) return;

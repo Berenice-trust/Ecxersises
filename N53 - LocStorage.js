@@ -1,8 +1,9 @@
 // Class to manage local storage for objects
+
 class ObjStorageClass {
     constructor(lskey) {
         this.lskey = lskey; // Key to identify the storage in localStorage
-        this.storage = {}; // Object to hold the data
+        this.storage = {}; 
         this.loadChanges(); // Load existing data from localStorage
     }
 
@@ -17,18 +18,18 @@ class ObjStorageClass {
             try {
                 this.storage = JSON.parse(localStorage[this.lskey]);
             } catch (er) {
-                console.error("Error", er); // Log any errors during parsing
+                console.error("Error in JSON"); // Log any errors during parsing
             }
         }
     }
 
-    // Add a new key-value pair to the storage
+    // Add a new key-value to the storage
     addValue(key, value) {
         this.storage[key] = value;
         this.saveChanges(); // Save changes to localStorage
     }
 
-    // Retrieve a value by key from the storage
+    // get a value by key from the storage
     getValue(key) {
         return this.storage[key];
     }
@@ -51,9 +52,14 @@ class ObjStorageClass {
 
 export { ObjStorageClass };
 
+
 // Create instances for storing cocktail and dish recipes
 let coctailsStorage = new ObjStorageClass('coctailsStorage');
 let dishesStorage = new ObjStorageClass('dishesStorage');
+
+
+
+
 
 // Add some initial cocktail recipes to the storage
 coctailsStorage.addValue("Маргарита", {
