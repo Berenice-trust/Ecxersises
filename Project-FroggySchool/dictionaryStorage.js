@@ -1,69 +1,48 @@
-class DictionaryStorage {
-    constructor(lskey) {
-        this.lskey = lskey; // Key to identify the storage in localStorage
-        this.storage = {}; 
-        this.loadChanges(); // Load existing data from localStorage
+export class DictionaryStorage {
+    constructor(storageKey) {
+        this.storageKey = storageKey;
+        this.words = JSON.parse(localStorage.getItem(this.storageKey)) || {};
     }
 
-    // Save the current state of storage to localStorage
-    saveChanges() {
-        localStorage[this.lskey] = JSON.stringify(this.storage);
+    save() {
+        localStorage.setItem(this.storageKey, JSON.stringify(this.words));
     }
 
-    // Load the state of storage from localStorage
-    loadChanges() {
-        if (localStorage[this.lskey]) {
-            try {
-                this.storage = JSON.parse(localStorage[this.lskey]);
-            } catch (er) {
-                console.error("Error in JSON"); // Log any errors during parsing
-            }
-        }
-    }
-
-    // Add a new word to the dictionary
     addWord(word, data) {
-        this.storage[word] = data;
-        this.saveChanges(); // Save changes to localStorage
+        this.words[word] = data;
+        this.save();
     }
 
-    // Get a word's data from the dictionary
     getWord(word) {
-        return this.storage[word];
+        return this.words[word];
     }
 
-    // Delete a word from the dictionary
-    deleteWord(word) {
-        if (this.storage.hasOwnProperty(word)) {
-            delete this.storage[word];
-            this.saveChanges(); // Save changes to localStorage
-            return true;
-        }
-        return false;
-    }
-
-    // Get all words from the dictionary
     getWords() {
-        return Object.keys(this.storage);
+        return Object.keys(this.words);
     }
 
-    // Edit a word's data in the dictionary
-    editWord(word, newData) {
-        if (this.storage.hasOwnProperty(word)) {
-            this.storage[word] = newData;
-            this.saveChanges(); // Save changes to localStorage
+    getWordsByCategory(category) {
+        return Object.keys(this.words).filter(word => this.words[word].category === category);
+    }
+
+    deleteWord(word) {
+        if (this.words[word]) {
+            delete this.words[word];
+            this.save();
             return true;
         }
         return false;
     }
 
-    // Get words by category
-    getWordsByCategory(category) {
-        return Object.keys(this.storage).filter(word => this.storage[word].category === category);
+    updateWord(word, data) {
+        if (this.words[word]) {
+            this.words[word] = data;
+            this.save();
+            return true;
+        }
+        return false;
     }
 }
-
-export { DictionaryStorage };
 
 // Create an instance for the dictionary
 const dictionaryStorage = new DictionaryStorage('dictionaryStorage');
