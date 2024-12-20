@@ -157,13 +157,12 @@
             listContainer.classList.add('show');
         }
 
-                                        // Event handlers for drinks 
-        // button Add Drink Recipe
-        document.getElementById('add-drink-recipe').onclick = function() {
-            let name = prompt("Введите название напитка:");
+        // function to add a recipe
+        function addRecipe(storage, outputSelector) {
+            let name = prompt("Введите название:");
             if (!name) return;
 
-            let isAlcoholic = confirm("Алкогольный напиток?");
+            let isAlcoholic = storage === coctailsStorage ? confirm("Алкогольный напиток?") : null;
             let ingredients = [];
             let moreIngredients = true;
 
@@ -179,22 +178,21 @@
             let recipe = prompt("Введите рецепт приготовления:");
             if (!recipe) return;
 
-            coctailsStorage.addValue(name, { 
-                isAlcoholic: isAlcoholic, 
-                ingredients: ingredients, 
-                recipe: recipe 
-            });
-            updateOutput("<p>Рецепт добавлен.</p>", '.drinks-output');
-        };
+            let value = { ingredients: ingredients, recipe: recipe };
+            if (isAlcoholic !== null) value.isAlcoholic = isAlcoholic;
 
-        // button Get Drink Recipe
-        document.getElementById('get-drink-recipe').onclick = function() {
-            let name = prompt("Введите название напитка:");
-            let recipe = coctailsStorage.getValue(name);
+            storage.addValue(name, value);
+            updateOutput("<p>Рецепт добавлен.</p>", outputSelector);
+        }
+
+        // function to get a recipe
+        function getRecipe(storage, outputSelector) {
+            let name = prompt("Введите название:");
+            let recipe = storage.getValue(name);
 
             if (recipe) {
                 let content = `
-                    <h2>${name} (алкогольный: ${recipe.isAlcoholic ? 'да' : 'нет'})</h2>
+                    <h2>${name}${recipe.isAlcoholic !== undefined ? ` (алкогольный: ${recipe.isAlcoholic ? 'да' : 'нет'})` : ''}</h2>
                     <h3>Необходимые ингредиенты:</h3>
                     <ul>
                         ${recipe.ingredients.map(function(ingredient) {
@@ -202,93 +200,65 @@
                         }).join('')}
                     </ul>
                     <p>${recipe.recipe}</p>`;
-                updateOutput(content, '.drinks-output');
+                updateOutput(content, outputSelector);
             } else {
-                updateOutput('<p>Такого напитка нет в хранилище.</p>', '.drinks-output');
+                updateOutput('<p>Такого рецепта нет в хранилище.</p>', outputSelector);
             }
-        };
+        }
 
-        // button Delete Drink Recipe
-        document.getElementById('delete-drink-recipe').onclick = function() {
-            let name = prompt("Введите название напитка:");
-            let result = coctailsStorage.deleteValue(name);
+        // function to delete a recipe
+        function deleteRecipe(storage, outputSelector) {
+            let name = prompt("Введите название:");
+            let result = storage.deleteValue(name);
 
             if (result) {
-                updateOutput('<p>Рецепт успешно удалён.</p>', '.drinks-output');
+                updateOutput('<p>Рецепт успешно удалён.</p>', outputSelector);
             } else {
-                updateOutput('<p>Такого напитка нет в хранилище.</p>', '.drinks-output');
+                updateOutput('<p>Такого рецепта нет в хранилище.</p>', outputSelector);
             }
+        }
+
+        // function to list all recipes
+        function listRecipes(storage, listSelector) {
+            let keys = storage.getKeys();
+            updateList(keys, listSelector);
+        }
+
+
+
+
+        // Event handlers for drinks
+        document.getElementById('add-drink-recipe').onclick = function() {
+            addRecipe(coctailsStorage, '.drinks-output');
         };
 
-        // button show list of Drinks
+        document.getElementById('get-drink-recipe').onclick = function() {
+            getRecipe(coctailsStorage, '.drinks-output');
+        };
+
+        document.getElementById('delete-drink-recipe').onclick = function() {
+            deleteRecipe(coctailsStorage, '.drinks-output');
+        };
+
         document.getElementById('list-drinks').onclick = function() {
-            let keys = coctailsStorage.getKeys();
-            updateList(keys, '.drinks-list');
+            listRecipes(coctailsStorage, '.drinks-list');
         };
 
-
-
-                                    // Event handlers for dishes
+        // Event handlers for dishes
         document.getElementById('add-dish-recipe').onclick = function() {
-            let name = prompt("Введите название блюда:");
-            if (!name) return;
-
-            let ingredients = [];
-            let moreIngredients = true;
-
-            while (moreIngredients) {
-                let ingredientName = prompt("Введите название ингредиента:");
-                if (!ingredientName) break;
-
-                let ingredientAmount = prompt("Введите количество ингредиента:");
-                ingredients.push({ name: ingredientName, amount: ingredientAmount });
-                moreIngredients = confirm("Добавить ещё один ингредиент?");
-            }
-
-            let recipe = prompt("Введите рецепт приготовления:");
-            if (!recipe) return;
-
-            dishesStorage.addValue(name, { 
-                ingredients: ingredients, 
-                recipe: recipe 
-            });
-            updateOutput("<p>Рецепт добавлен.</p>", '.dishes-output');
+            addRecipe(dishesStorage, '.dishes-output');
         };
 
         document.getElementById('get-dish-recipe').onclick = function() {
-            let name = prompt("Введите название блюда:");
-            let recipe = dishesStorage.getValue(name);
-
-            if (recipe) {
-                let content = `
-                    <h2>${name}</h2>
-                    <h3>Необходимые ингредиенты:</h3>
-                    <ul>
-                        ${recipe.ingredients.map(function(ingredient) {
-                            return `<li>${ingredient.name} ${ingredient.amount}</li>`;
-                        }).join('')}
-                    </ul>
-                    <p>${recipe.recipe}</p>`;
-                updateOutput(content, '.dishes-output');
-            } else {
-                updateOutput('<p>Такого блюда нет в хранилище.</p>', '.dishes-output');
-            }
+            getRecipe(dishesStorage, '.dishes-output');
         };
 
         document.getElementById('delete-dish-recipe').onclick = function() {
-            let name = prompt("Введите название блюда:");
-            let result = dishesStorage.deleteValue(name);
-
-            if (result) {
-                updateOutput('<p>Рецепт успешно удалён.</p>', '.dishes-output');
-            } else {
-                updateOutput('<p>Такого блюда нет в хранилище.</p>', '.dishes-output');
-            }
+            deleteRecipe(dishesStorage, '.dishes-output');
         };
 
         document.getElementById('list-dishes').onclick = function() {
-            let keys = dishesStorage.getKeys();
-            updateList(keys, '.dishes-list');
+            listRecipes(dishesStorage, '.dishes-list');
         };
     </script>
 </body>
