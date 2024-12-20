@@ -2,7 +2,7 @@ import { DictionaryStorage } from './dictionaryStorage.js';
 
 const dictionaryStorage = new DictionaryStorage('dictionaryStorage');
 let wordToDelete = '';
-let currentCategory = '';
+let currentCategory = localStorage.getItem('currentCategory') || '';
 let scrollPosition = 0;
 
 function updateOutput(content, outputSelector) {
@@ -29,6 +29,7 @@ function updateList(items, listSelector) {
 
 function listWords(category = '') {
     currentCategory = category;
+    localStorage.setItem('currentCategory', currentCategory);
     let words;
     if (category) {
         words = dictionaryStorage.getWordsByCategory(category);
@@ -49,7 +50,6 @@ function listWords(category = '') {
             <p><strong>Category:</strong> ${data.category}</p>
             ${data.imageUrl ? `<img src="${data.imageUrl}" alt="${word}">` : ''}
             ${data.audioUrl ? `<audio controls src="${data.audioUrl}"></audio>` : ''}
-            <button onclick="editWord('${word}')">Edit</button>
             <button onclick="showDeleteModal('${word}')">Delete</button>
             <div class="message"></div>
         `;
@@ -57,6 +57,7 @@ function listWords(category = '') {
     });
 
     document.querySelector('.word-list').classList.add('show');
+    updateCategoryFilter();
 }
 
 function updateCategoryFilter() {
@@ -69,95 +70,8 @@ function updateCategoryFilter() {
         option.textContent = category;
         categoryFilter.appendChild(option);
     });
+    categoryFilter.value = currentCategory;
 }
-
-window.editWord = function(word) {
-    scrollPosition = window.scrollY;
-    const data = dictionaryStorage.getWord(word);
-    document.getElementById('edit-word-name').value = word;
-    document.getElementById('edit-word').value = word;
-    document.getElementById('edit-translation').value = data.translation;
-    document.getElementById('edit-example').value = data.example;
-    document.getElementById('edit-category').value = data.category;
-    document.getElementById('edit-imageUrl').value = data.imageUrl;
-    document.getElementById('edit-audioUrl').value = data.audioUrl;
-
-    const card = document.querySelector(`.card h3[data-word="${word}"]`).parentElement;
-    card.classList.add('expanded');
-    setTimeout(() => {
-        document.getElementById('edit-modal').style.display = 'flex';
-    }, 300);
-};
-
-document.getElementById('cancel-edit').onclick = function() {
-    document.getElementById('edit-modal').style.display = 'none';
-    const word = document.getElementById('edit-word-name').value;
-    const card = document.querySelector(`.card h3[data-word="${word}"]`).parentElement;
-    card.classList.remove('expanded');
-    window.scrollTo(0, scrollPosition);
-};
-
-document.getElementById('edit-form').onsubmit = function(event) {
-    event.preventDefault();
-
-    const oldWord = document.getElementById('edit-word-name').value;
-    const newWord = document.getElementById('edit-word').value;
-    const translation = document.getElementById('edit-translation').value;
-    const example = document.getElementById('edit-example').value;
-    const category = document.getElementById('edit-category').value;
-    const imageUrl = document.getElementById('edit-imageUrl').value;
-    const audioUrl = document.getElementById('edit-audioUrl').value;
-
-    const data = { translation, example, category, imageUrl, audioUrl };
-
-    if (oldWord !== newWord) {
-        dictionaryStorage.deleteWord(oldWord);
-    }
-    dictionaryStorage.addWord(newWord, data);
-
-    const card = document.querySelector(`.card h3[data-word="${oldWord}"]`).parentElement;
-    card.querySelector('h3').textContent = newWord;
-    card.querySelector('h3').dataset.word = newWord;
-    card.querySelector('p strong').nextSibling.textContent = ` ${data.translation}`;
-    card.querySelector('p strong').nextSibling.nextSibling.nextSibling.textContent = ` ${data.example}`;
-    card.querySelector('p strong').nextSibling.nextSibling.nextSibling.nextSibling.nextSibling.textContent = ` ${data.category}`;
-    if (data.imageUrl) {
-        if (card.querySelector('img')) {
-            card.querySelector('img').src = data.imageUrl;
-        } else {
-            card.querySelector('p strong').nextSibling.nextSibling.nextSibling.nextSibling.insertAdjacentHTML('afterend', `<img src="${data.imageUrl}" alt="${newWord}">`);
-        }
-    } else {
-        if (card.querySelector('img')) {
-            card.querySelector('img').remove();
-        }
-    }
-    if (data.audioUrl) {
-        if (card.querySelector('audio')) {
-            card.querySelector('audio').src = data.audioUrl;
-        } else {
-            card.querySelector('p strong').nextSibling.nextSibling.nextSibling.nextSibling.insertAdjacentHTML('afterend', `<audio controls src="${data.audioUrl}"></audio>`);
-        }
-    } else {
-        if (card.querySelector('audio')) {
-            card.querySelector('audio').remove();
-        }
-    }
-
-    const message = card.querySelector('.message');
-    message.textContent = 'Word updated.';
-    setTimeout(() => {
-        message.textContent = '';
-    }, 3000);
-
-    document.getElementById('edit-modal').style.display = 'none';
-    card.classList.remove('expanded');
-    window.scrollTo(0, scrollPosition);
-};
-
-document.getElementById('save-edit').onclick = function() {
-    document.getElementById('edit-form').submit();
-};
 
 window.showDeleteModal = function(word) {
     wordToDelete = word;
@@ -225,5 +139,5 @@ document.getElementById('add-word').onclick = function() {
 };
 
 // Initial load
-listWords();
+listWords(currentCategory);
 updateCategoryFilter();
