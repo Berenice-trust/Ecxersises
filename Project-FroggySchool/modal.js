@@ -1,5 +1,4 @@
-export function createModal(modalId, content, confirmCallback, cancelCallback) {
-    console.log(`Creating modal with ID: ${modalId}`); // Debugging line
+export function createModal(modalId, content, confirmCallback, cancelCallback, confirmText = 'Save', cancelText = 'Cancel') {
     const modal = document.createElement('div');
     modal.classList.add('modal');
     modal.id = modalId;
@@ -7,13 +6,12 @@ export function createModal(modalId, content, confirmCallback, cancelCallback) {
     modal.innerHTML = `
         <div class="modal-content">
             ${content}
-            <button id="confirm-${modalId}">Save</button>
-            <button id="cancel-${modalId}">Cancel</button>
+            <button id="confirm-${modalId}">${confirmText}</button>
+            <button id="cancel-${modalId}">${cancelText}</button>
         </div>
     `;
 
     document.body.appendChild(modal);
-    console.log(`Modal with ID: ${modalId} added to the DOM`); // Debugging line
 
     document.getElementById(`confirm-${modalId}`).addEventListener('click', () => {
         confirmCallback();
@@ -27,14 +25,11 @@ export function createModal(modalId, content, confirmCallback, cancelCallback) {
 
     // Display the modal
     modal.style.display = 'flex';
-    console.log(`Modal with ID: ${modalId} displayed`); // Debugging line
-    console.log(modal); // Debugging line
 }
 
 export function closeModal(modalId) {
     const modal = document.getElementById(modalId);
     if (modal) {
         modal.remove();
-        console.log(`Modal with ID: ${modalId} removed from the DOM`); // Debugging line
     }
 }

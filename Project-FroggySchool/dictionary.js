@@ -109,11 +109,10 @@ window.showDeleteModal = function(word) {
         updateCategoryFilter();
     }, () => {
         // Cancel action
-    });
+    }, 'Yes', 'No');
 };
 
 window.showEditModal = function(word) {
-    console.log(`Editing word: ${word}`); // Debugging line
     scrollPosition = window.scrollY; // Save the current scroll position
     history.scrollRestoration = 'manual'; // Disable automatic scroll restoration
     const data = dictionaryStorage.getWord(word);
@@ -162,8 +161,7 @@ window.showEditModal = function(word) {
     }, () => {
         // Cancel action
         window.scrollTo(0, scrollPosition); // Restore the scroll position
-    });
-    console.log(`Modal for editing word: ${word} created`); // Debugging line
+    }, 'Save', 'Cancel');
 }
 
 document.getElementById('list-words').onclick = function() {
