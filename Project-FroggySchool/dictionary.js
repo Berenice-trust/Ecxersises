@@ -51,8 +51,8 @@ function listWords(category = '') {
             <p><strong>Category:</strong> ${data.category}</p>
             ${data.imageUrl ? `<img src="${data.imageUrl}" alt="${word}">` : ''}
             ${data.audioUrl ? `<audio controls src="${data.audioUrl}"></audio>` : ''}
-            <button onclick="showEditModal('${word}')">Edit</button>
-            <button onclick="showDeleteModal('${word}')">Delete</button>
+            <button onclick="showEditModal('${word}', this)">Edit</button>
+            <button onclick="showDeleteModal('${word}', this)">Delete</button>
             <div class="message"></div>
         `;
         wordList.appendChild(card);
@@ -75,7 +75,7 @@ function updateCategoryFilter() {
     categoryFilter.value = currentCategory;
 }
 
-window.showDeleteModal = function(word) {
+window.showDeleteModal = function(word, triggerElement) {
     wordToDelete = word;
     const content = `
         <p>Are you sure you want to delete this word?</p>
@@ -109,10 +109,10 @@ window.showDeleteModal = function(word) {
         updateCategoryFilter();
     }, () => {
         // Cancel action
-    }, 'Yes', 'No');
+    }, 'Yes', 'No', triggerElement);
 };
 
-window.showEditModal = function(word) {
+window.showEditModal = function(word, triggerElement) {
     scrollPosition = window.scrollY; // Save the current scroll position
     history.scrollRestoration = 'manual'; // Disable automatic scroll restoration
     const data = dictionaryStorage.getWord(word);
@@ -148,8 +148,8 @@ window.showEditModal = function(word) {
             <p><strong>Category:</strong> ${updatedData.category}</p>
             ${updatedData.imageUrl ? `<img src="${updatedData.imageUrl}" alt="${newWord}">` : ''}
             ${updatedData.audioUrl ? `<audio controls src="${updatedData.audioUrl}"></audio>` : ''}
-            <button onclick="showEditModal('${newWord}')">Edit</button>
-            <button onclick="showDeleteModal('${newWord}')">Delete</button>
+            <button onclick="showEditModal('${newWord}', this)">Edit</button>
+            <button onclick="showDeleteModal('${newWord}', this)">Delete</button>
             <div class="message">Changes saved</div>
         `;
         setTimeout(() => {
@@ -161,7 +161,7 @@ window.showEditModal = function(word) {
     }, () => {
         // Cancel action
         window.scrollTo(0, scrollPosition); // Restore the scroll position
-    }, 'Save', 'Cancel');
+    }, 'Save', 'Cancel', triggerElement);
 }
 
 document.getElementById('list-words').onclick = function() {

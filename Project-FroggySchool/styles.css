@@ -188,3 +188,51 @@ li {
   font-size: var(--font-size-large);
 }
 
+.modal-card {
+  display: none;
+  position: fixed;
+  z-index: 1;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  background-color: rgba(0, 0, 0, 0.4);
+  justify-content: center;
+  align-items: center;
+}
+
+.modal-card.show {
+  display: flex;
+}
+
+.modal-card .modal-content {
+  background-color: var(--card-background-color);
+  margin: auto;
+  padding: 20px;
+  border: 1px solid #888;
+  width: 500px; /* Set the final width */
+  height: 300px; /* Set the final height */
+  border-radius: var(--border-radius);
+  box-shadow: var(--box-shadow);
+}
+
+.modal-card .modal-body {
+  visibility: hidden;
+}
+
+.modal-card .modal-body label {
+  display: block;
+  margin-bottom: 10px;
+  font-weight: bold;
+}
+
+.modal-card .modal-body input {
+  display: block;
+  width: calc(100% - 20px);
+  margin: 10px 0;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
