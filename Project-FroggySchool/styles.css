@@ -1,0 +1,238 @@
+/* CSS Variables */
+:root {
+  --primary-color: #007bff;
+  --primary-color-hover: #0056b3;
+  --background-color: #f0f0f0;
+  --text-color: #333;
+  --card-background-color: #fff;
+  --card-shadow-color: rgba(0, 0, 0, 0.1);
+  --modal-background-color: rgba(0, 0, 0, 0.5);
+  --modal-content-background-color: #fff;
+  --message-color: green;
+  --border-radius: 10px;
+  --box-shadow: 0 0 10px var(--card-shadow-color);
+  --padding: 20px;
+  --margin: 20px;
+  --button-padding: 10px 20px;
+  --button-hover-scale: 1.05;
+  --font-size-large: 1.2em;
+  --font-size-medium: 1.1em;
+  --font-size-small: 0.9em;
+  --max-width-container: 800px;
+  --max-width-modal: 500px;
+  --max-width-image: 100px;
+}
+
+body {
+  font-family: 'Arial', sans-serif;
+  background: var(--background-color);
+  color: var(--text-color);
+  margin: 0;
+  padding: 0;
+  text-align: center;
+}
+
+.container {
+  margin: var(--margin) auto;
+  max-width: var(--max-width-container);
+  padding: var(--padding);
+  background: var(--card-background-color);
+  border-radius: var(--border-radius);
+  box-shadow: var(--box-shadow);
+}
+
+h1 {
+  color: var(--text-color);
+  margin-bottom: var(--margin);
+}
+
+button {
+  background-color: var(--primary-color);
+  border: none;
+  color: white;
+  padding: var(--button-padding);
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 1em;
+  margin: 10px 5px;
+  cursor: pointer;
+  border-radius: 5px;
+  transition: background-color 0.3s, transform 0.2s;
+}
+
+button:hover {
+  background-color: var(--primary-color-hover);
+  transform: scale(var(--button-hover-scale));
+}
+
+.output {
+  padding: var(--padding);
+  background-color: #f9f9f9;
+  border-radius: var(--border-radius);
+  box-shadow: var(--box-shadow);
+  text-align: left;
+  display: none; 
+  margin-top: var(--margin); 
+}
+
+.show {
+  display: block; 
+}
+
+h2 {
+  color: var(--primary-color);
+  margin-top: 0;
+}
+
+ul {
+  list-style-type: none;
+  padding-left: 0;
+}
+
+li {
+  margin: 8px 0;
+  font-size: var(--font-size-medium);
+}
+
+.word-list li {
+  cursor: pointer;
+  transition: color 0.3s;
+}
+
+.word-list li:hover {
+  color: var(--primary-color);
+}
+
+.card {
+  background: var(--card-background-color);
+  border-radius: var(--border-radius);
+  box-shadow: var(--box-shadow);
+  padding: var(--padding);
+  margin: 10px 0;
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+.card h3 {
+  margin: 0 0 10px;
+  display: inline-block;
+}
+
+.card p {
+  margin: 5px 0;
+}
+
+.card img {
+  max-width: var(--max-width-image);
+  display: block;
+  margin: 10px 0;
+}
+
+.card audio {
+  display: block;
+  margin: 10px 0;
+}
+
+.card .message {
+  color: var(--message-color);
+  font-size: var(--font-size-small);
+  position: absolute;
+  top: 0;
+  right: 20px;
+  margin-top: 10px;
+}
+
+.modal {
+  display: none;
+  position: fixed;
+  z-index: 1;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  background-color: rgba(0, 0, 0, 0.4);
+  justify-content: center;
+  align-items: center;
+}
+
+.modal.show {
+  display: flex;
+}
+
+.modal-content {
+  background-color: #fefefe;
+  margin: auto;
+  padding: 20px;
+  border: 1px solid #888;
+  width: 80%;
+  max-width: 500px;
+}
+
+.modal button {
+  margin: 10px 5px;
+}
+
+.modal input {
+  display: block;
+  width: calc(100% - 20px);
+  margin: 10px 0;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
+.modal input#edit-word {
+  font-weight: bold;
+  font-size: var(--font-size-large);
+}
+
+.modal-card {
+  display: none;
+  position: fixed;
+  z-index: 1;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+  background-color: rgba(0, 0, 0, 0.4);
+  justify-content: center;
+  align-items: center;
+}
+
+.modal-card.show {
+  display: flex;
+}
+
+.modal-card .modal-content {
+  background-color: var(--card-background-color);
+  margin: auto;
+  padding: 20px;
+  border: 1px solid #888;
+  width: 500px; /* Set the final width */
+  height: 300px; /* Set the final height */
+  border-radius: var(--border-radius);
+  box-shadow: var(--box-shadow);
+}
+
+.modal-card .modal-body {
+  visibility: hidden;
+}
+
+.modal-card .modal-body label {
+  display: block;
+  margin-bottom: 10px;
+  font-weight: bold;
+}
+
+.modal-card .modal-body input {
+  display: block;
+  width: calc(100% - 20px);
+  margin: 10px 0;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+}
+
