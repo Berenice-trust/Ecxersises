@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DYN_FORM</title>
+</head>
+<body>
+    <form id="form1" action="https://fe.it-academy.by/TestForm.php"></form>
+    <form id="form2" action="https://fe.it-academy.by/TestForm.php"></form>
+
+    <script>
+        const formDef1 = [
+            {label:'Название сайта:',kind:'longtext',name:'sitename'},
+            {label:'URL сайта:',kind:'longtext',name:'siteurl'},
+            {label:'Посетителей в сутки:',kind:'number',name:'visitors'},
+            {label:'E-mail для связи:',kind:'shorttext',name:'email'},
+            {label:'Рубрика каталога:',kind:'dropdown',name:'division',
+                variants:[{text:'здоровье',value:1},{text:'домашний уют',value:2},{text:'бытовая техника',value:3}]},
+            {label:'Размещение:',kind:'radio',name:'payment',
+                variants:[{text:'бесплатное',value:1},{text:'платное',value:2},{text:'VIP',value:3}]},
+            {label:'Разрешить отзывы:',kind:'check',name:'votes'},
+            {label:'Описание сайта:',kind:'memo',name:'description'},
+            {caption:'Опубликовать',kind:'submit'},
+        ];
+
+        const formDef2 = [
+            {label:'Фамилия:',kind:'longtext',name:'lastname'},
+            {label:'Имя:',kind:'longtext',name:'firstname'},
+            {label:'Отчество:',kind:'longtext',name:'secondname'},
+            {label:'Возраст:',kind:'number',name:'age'},
+            {caption:'Зарегистрироваться',kind:'submit'},
+        ];
+
+        function createForm(form, formDef) {
+            formDef.forEach(field => {
+                let element;
+                switch (field.kind) {
+                    case 'longtext':
+                    case 'shorttext':
+                    case 'number':
+                        element = document.createElement('input');
+                        element.type = field.kind === 'number' ? 'number' : 'text';
+                        element.name = field.name;
+                        break;
+                    case 'dropdown':
+                        element = document.createElement('select');
+                        element.name = field.name;
+                        field.variants.forEach(variant => {
+                            const option = document.createElement('option');
+                            option.value = variant.value;
+                            option.textContent = variant.text;
+                            element.appendChild(option);
+                        });
+                        break;
+                    case 'radio':
+                        element = document.createDocumentFragment();
+                        field.variants.forEach(variant => {
+                            const label = document.createElement('label');
+                            const radio = document.createElement('input');
+                            radio.type = 'radio';
+                            radio.name = field.name;
+                            radio.value = variant.value;
+                            label.appendChild(radio);
+                            label.appendChild(document.createTextNode(variant.text));
+                            element.appendChild(label);
+                        });
+                        break;
+                    case 'check':
+                        element = document.createElement('input');
+                        element.type = 'checkbox';
+                        element.name = field.name;
+                        break;
+                    case 'memo':
+                        element = document.createElement('textarea');
+                        element.name = field.name;
+                        break;
+                    case 'submit':
+                        element = document.createElement('input');
+                        element.type = 'submit';
+                        element.value = field.caption;
+                        break;
+                }
+                if (field.label) {
+                    const label = document.createElement('label');
+                    label.textContent = field.label;
+                    form.appendChild(label);
+                }
+                form.appendChild(element);
+                form.appendChild(document.createElement('br'));
+            });
+        }
+
+        createForm(document.getElementById('form1'), formDef1);
+        createForm(document.getElementById('form2'), formDef2);
+    </script>
+</body>
+</html>
