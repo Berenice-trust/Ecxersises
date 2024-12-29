@@ -127,11 +127,11 @@
 
                                     <!-- JS   -->
     <script type="module">
-        import { AJAXStorage } from './AJAXStorage.js'; // Import the AJAXStorage class
+        import { AJAXStorage } from './N63 - AJAXStorage.js'; // Import the AJAXStorage class
 
         // Create instances for storing cocktail and dish recipes
-        const coctailsStorage = new AJAXStorage('coctailsStorage');
-        const dishesStorage = new AJAXStorage('dishesStorage');
+        const coctailsStorage = new AJAXStorage('Zhytnik_Drinks_CoctailsStorage');
+        const dishesStorage = new AJAXStorage('Zhytnik_Drinks_DishesStorage');
 
         // Function to update the content of the output element
         function updateOutput(content, outputSelector) {
@@ -223,9 +223,6 @@
             let keys = storage.getKeys();
             updateList(keys, listSelector);
         }
-
-
-
 
         // Event handlers for drinks
         document.getElementById('add-drink-recipe').onclick = function() {
