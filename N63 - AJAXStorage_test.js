@@ -1,71 +1,49 @@
+import { getDatabase, ref, set, get, child, remove } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-database.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
+
 class AJAXStorage {
-    constructor(lskey) {
+    constructor(lskey, db) {
         this.lskey = lskey;
         this.storage = {};
-        this.ajaxHandlerScript = "https://fe.it-academy.by/AjaxStringStorage2.php";
-        this.password = "Password"; // для простоты TODO заменить на рандомный пароль
+        this.db = db;
         this.initializeStorage();
     }
 
-    async saveToServer() {
-        let sp = new URLSearchParams();
-        sp.append('f', 'LOCKGET');
-        sp.append('n', this.lskey);
-        sp.append('p', this.password);
-
+    async saveToFirebase() {
         try {
-            let response = await fetch(this.ajaxHandlerScript, { method: 'post', body: sp });
-            let data = await response.json();
-
-            if (data.error) {
-                throw new Error(data.error);
-            }
-
-            let sp2 = new URLSearchParams();
-            sp2.append('f', 'UPDATE');
-            sp2.append('n', this.lskey);
-            sp2.append('p', this.password);
-            sp2.append('v', JSON.stringify(this.storage));
-
-            await fetch(this.ajaxHandlerScript, { method: 'post', body: sp2 });
+            await set(ref(this.db, this.lskey), this.storage);
+            console.log(`Data saved to Firebase for ${this.lskey}:`, this.storage);
         } catch (error) {
-            console.error(`Error during saveToServer for ${this.lskey}:`, error);
+            console.error(`Error during saveToFirebase for ${this.lskey}:`, error);
         }
     }
 
-    async readFromServer() {
-        let sp = new URLSearchParams();
-        sp.append('f', 'READ');
-        sp.append('n', this.lskey);
-
+    async readFromFirebase() {
         try {
-            let response = await fetch(this.ajaxHandlerScript, { method: 'post', body: sp });
-            let data = await response.json();
-            if (data.result) {
-                this.storage = JSON.parse(data.result);
+            const snapshot = await get(child(ref(this.db), this.lskey));
+            if (snapshot.exists()) {
+                this.storage = snapshot.val();
+                console.log(`Data read from Firebase for ${this.lskey}:`, this.storage);
+            } else {
+                console.log(`No data available for ${this.lskey}`);
             }
         } catch (error) {
-            console.error(`Error during readFromServer for ${this.lskey}:`, error);
+            console.error(`Error during readFromFirebase for ${this.lskey}:`, error);
         }
     }
 
-    async insertToServer() {
-        let sp = new URLSearchParams();
-        sp.append('f', 'INSERT');
-        sp.append('n', this.lskey);
-        sp.append('v', JSON.stringify(this.storage));
-
+    async insertToFirebase() {
         try {
-            let response = await fetch(this.ajaxHandlerScript, { method: 'post', body: sp });
-            await response.json();
+            await set(ref(this.db, this.lskey), this.storage);
+            console.log(`Data inserted to Firebase for ${this.lskey}:`, this.storage);
         } catch (error) {
-            console.error(`Error during insertToServer for ${this.lskey}:`, error);
+            console.error(`Error during insertToFirebase for ${this.lskey}:`, error);
         }
     }
 
     addValue(key, value) {
         this.storage[key] = value;
-        this.saveToServer();
+        this.saveToFirebase();
     }
 
     getValue(key) {
@@ -75,7 +53,7 @@ class AJAXStorage {
     deleteValue(key) {
         if (this.storage.hasOwnProperty(key)) {
             delete this.storage[key];
-            this.saveToServer();
+            this.saveToFirebase();
             return true;
         }
         return false;
@@ -86,7 +64,7 @@ class AJAXStorage {
     }
 
     async initializeStorage() {
-        await this.readFromServer();
+        await this.readFromFirebase();
 
         // Initial cocktail recipes
         const initialCocktailRecipes = [
@@ -210,30 +188,41 @@ class AJAXStorage {
 
         // Add initial cocktail recipes to the storage
         if (this.lskey === 'Zhytnik_Drinks_CoctailsStorage') {
-            initialCocktailRecipes.forEach(recipe => {
+            for (let recipe of initialCocktailRecipes) {
                 if (!this.storage[recipe.name]) {
                     this.addValue(recipe.name, recipe.data);
                 }
-            });
+            }
         }
 
         // Add initial dish recipes to the storage
         if (this.lskey === 'Zhytnik_Drinks_DishesStorage') {
-            initialDishRecipes.forEach(recipe => {
+            for (let recipe of initialDishRecipes) {
                 if (!this.storage[recipe.name]) {
                     this.addValue(recipe.name, recipe.data);
                 }
-            });
+            }
         }
 
-        // Insert to server if storage is empty
+        // Insert to Firebase if storage is empty
         if (Object.keys(this.storage).length === 0) {
-            this.insertToServer();
+            this.insertToFirebase();
         }
     }
 }
 
-export { AJAXStorage };
+// Initialize Firebase
+const firebaseConfig = {
+    apiKey: "AIzaSyCOmcuVCOLAyLPvQkn52t51j0P-vx6dLXQ",
+            authDomain: "coctails-2e469.firebaseapp.com",
+            databaseURL: "https://coctails-2e469-default-rtdb.firebaseio.com",
+            projectId: "coctails-2e469",
+            storageBucket: "coctails-2e469.appspot.com",
+            messagingSenderId: "647084187818",
+            appId: "1:647084187818:web:968579f3b6b234d510b0d3",
+            measurementId: "G-EGDP5H3VRN"
+};
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
 
-
-
+export { AJAXStorage, db };

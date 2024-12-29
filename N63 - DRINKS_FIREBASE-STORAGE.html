@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cocktails</title>
+  <style>
+    body {
+      font-family: 'Arial', sans-serif;
+      background: #1c1c1c;
+      color: white;
+      margin: 0;
+      padding: 0;
+      text-align: center;
+    }
+    *,
+    *::before,
+    *::after {
+        box-sizing: border-box;
+    }
+    h1 {
+      color: #e6007e;
+      margin: 20px 0;
+      font-size: 2.5em;
+    }
+    button {
+      background-color: #e6007e;
+      border: none;
+      color: white;
+      padding: 15px 25px;
+      text-align: center;
+      text-decoration: none;
+      display: inline-block;
+      font-size: 1em;
+      margin: 10px 5px;
+      cursor: pointer;
+      border-radius: 5px;
+      transition: background-color 0.3s, transform 0.2s;
+    }
+    button:hover {
+      background-color: #d1006f;
+      transform: scale(1.05);
+    }
+    .container {
+      margin: 20px auto;
+      max-width: 1200px;
+      padding: 0 20px;
+    }
+    .coctails-list,
+    .output {
+      padding: 20px;
+      background-color: rgba(44, 62, 80, 0.8); 
+      border-radius: 10px;
+      box-shadow: 0 0 15px rgba(0, 0, 0, 0.8);
+      color: #ecf0f1;
+      text-align: left;
+      display: none; 
+      margin-bottom: 20px; 
+    }
+    .show {
+      display: block; 
+    }
+    h2 {
+      color: #e6007e;
+      margin-top: 0;
+    }
+    h3 {
+      color: white;
+      margin-top: 0;
+    }
+    ul {
+      list-style-type: disc;
+      padding-left: 20px;
+    }
+    li {
+      margin: 8px 0;
+      font-size: 1.1em;
+    }
+    /* p {
+      color: white;
+    } */
+    .coctails-list ul {
+      list-style-type: none;
+      padding: 0;
+      margin: 0;
+    }
+    .coctails-list li {
+      cursor: pointer;
+      transition: color 0.3s;
+    }
+    .coctails-list li:hover {
+      color: #e6007e;
+    }
+  </style>
+</head>
+<body>
+    <h1>Night Club Crocodile</h1>
+    <div class="container">
+      <!-- Section for drinks -->
+        <h2>Напитки</h2>
+        <button id="add-drink-recipe">Ввод рецепта напитка</button>
+        <button id="get-drink-recipe">Рецепт напитка</button>
+        <button id="delete-drink-recipe">Удаление рецепта напитка</button>
+        <button id="list-drinks">Перечень всех напитков</button>
+
+        <div class="coctails-list drinks-list">
+            <h2>Список коктейлей</h2>
+            <ul></ul>
+        </div>
+
+        <div class="output drinks-output"></div>
+
+        <!-- Section for dishes -->
+        <h2>Блюда</h2>
+        <button id="add-dish-recipe">Ввод рецепта блюда</button>
+        <button id="get-dish-recipe">Рецепт блюда</button>
+        <button id="delete-dish-recipe">Удаление рецепта блюда</button>
+        <button id="list-dishes">Перечень всех блюд</button>
+
+        <div class="coctails-list dishes-list">
+            <h2>Список блюд</h2>
+            <ul></ul>
+        </div>
+
+        <div class="output dishes-output"></div>
+    </div>
+
+    <!-- JS -->
+    <script type="module">
+        // Import the functions you need from the SDKs you need
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
+        import { getDatabase } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-database.js";
+        import firebaseConfig from './firebaseConfig.js';
+        import { FirebaseStorage } from './N63 - FirebaseStorage.js'; // Import the FirebaseStorage class
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        // Create instances for storing cocktail and dish recipes
+        const coctailsStorage = new FirebaseStorage('Zhytnik_Drinks_CoctailsStorage', db);
+        const dishesStorage = new FirebaseStorage('Zhytnik_Drinks_DishesStorage', db);
+
+        // Function to update the content of the output element
+        function updateOutput(content, outputSelector) {
+            let output = document.querySelector(outputSelector);
+            output.innerHTML = content;
+
+            if (content.trim()) {
+                output.classList.add('show');
+            } else {
+                output.classList.remove('show');
+            }
+        }
+
+        // Function to update the list of items
+        function updateList(items, listSelector) {
+            let listContainer = document.querySelector(listSelector);
+            let list = listContainer.querySelector('ul');
+
+            list.innerHTML = items.map(function(item) {
+                return `<li>${item}</li>`;
+            }).join('');
+
+            listContainer.classList.add('show');
+        }
+
+        // Function to add a recipe to the storage
+        function addRecipe(storage, outputSelector) {
+            let name = prompt("Введите название:");
+            if (!name) return;
+
+            let isAlcoholic = storage === coctailsStorage ? confirm("Алкогольный напиток?") : null;
+            let ingredients = [];
+            let moreIngredients = true;
+
+            while (moreIngredients) {
+                let ingredientName = prompt("Введите название ингредиента:");
+                if (!ingredientName) break;
+
+                let ingredientAmount = prompt("Введите количество ингредиента:");
+                ingredients.push({ name: ingredientName, amount: ingredientAmount });
+                moreIngredients = confirm("Добавить ещё один ингредиент?");
+            }
+
+            let recipe = prompt("Введите рецепт приготовления:");
+            if (!recipe) return;
+
+            let value = { ingredients: ingredients, recipe: recipe };
+            if (isAlcoholic !== null) value.isAlcoholic = isAlcoholic;
+
+            storage.addValue(name, value);
+            updateOutput("<p>Рецепт добавлен.</p>", outputSelector);
+        }
+
+        // Function to get a recipe from the storage
+        function getRecipe(storage, outputSelector) {
+            let name = prompt("Введите название:");
+            let recipe = storage.getValue(name);
+
+            if (recipe) {
+                let content = `
+                    <h2>${name}${recipe.isAlcoholic !== undefined ? ` (алкогольный: ${recipe.isAlcoholic ? 'да' : 'нет'})` : ''}</h2>
+                    <h3>Необходимые ингредиенты:</h3>
+                    <ul>
+                        ${recipe.ingredients.map(function(ingredient) {
+                            return `<li>${ingredient.name} ${ingredient.amount}</li>`;
+                        }).join('')}
+                    </ul>
+                    <p>${recipe.recipe}</p>`;
+                updateOutput(content, outputSelector);
+            } else {
+                updateOutput('<p>Такого рецепта нет в хранилище.</p>', outputSelector);
+            }
+        }
+
+        // Function to delete a recipe from the storage
+        function deleteRecipe(storage, outputSelector) {
+            let name = prompt("Введите название:");
+            let result = storage.deleteValue(name);
+
+            if (result) {
+                updateOutput('<p>Рецепт успешно удалён.</п>', outputSelector);
+            } else {
+                updateOutput('<п>Такого рецепта нет в хранилище.</п>', outputSelector);
+            }
+        }
+
+        // Function to list all recipes in the storage
+        function listRecipes(storage, listSelector) {
+            let keys = storage.getKeys();
+            updateList(keys, listSelector);
+        }
+
+        // Event handlers for drinks
+        document.getElementById('add-drink-recipe').onclick = function() {
+            addRecipe(coctailsStorage, '.drinks-output');
+        };
+
+        document.getElementById('get-drink-recipe').onclick = function() {
+            getRecipe(coctailsStorage, '.drinks-output');
+        };
+
+        document.getElementById('delete-drink-recipe').onclick = function() {
+            deleteRecipe(coctailsStorage, '.drinks-output');
+        };
+
+        document.getElementById('list-drinks').onclick = function() {
+            listRecipes(coctailsStorage, '.drinks-list');
+        };
+
+        // Event handlers for dishes
+        document.getElementById('add-dish-recipe').onclick = function() {
+            addRecipe(dishesStorage, '.dishes-output');
+        };
+
+        document.getElementById('get-dish-recipe').onclick = function() {
+            getRecipe(dishesStorage, '.dishes-output');
+        };
+
+        document.getElementById('delete-dish-recipe').onclick = function() {
+            deleteRecipe(dishesStorage, '.dishes-output');
+        };
+
+        document.getElementById('list-dishes').onclick = function() {
+            listRecipes(dishesStorage, '.dishes-list');
+        };
+    </script>
+</body>
+</html>
