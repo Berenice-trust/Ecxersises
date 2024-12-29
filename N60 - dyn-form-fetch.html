@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DYN_FORM</title>
+    <style>
+        form {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-top: 10px;
+        }
+        input, select, textarea {
+            margin-top: 5px;
+            margin-bottom: 10px;
+            width: 100%;
+            max-width: 300px;
+        }
+        input[type="radio"], input[type="checkbox"] {
+            width: auto;
+        }
+        input[type="submit"] {
+            height: 40px; /* Increase the height of submit buttons */
+        }
+    </style>
+</head>
+<body>
+    <form id="form1" action="https://fe.it-academy.by/TestForm.php"></form>
+    <form id="form2" action="https://fe.it-academy.by/TestForm.php"></form>
+
+    <script>
+        function createForm(form, formDef) {
+            formDef.forEach(field => {
+                let element;
+                switch (field.kind) {
+                    case 'longtext':
+                    case 'shorttext':
+                    case 'number':
+                        element = document.createElement('input');
+                        element.type = field.kind === 'number' ? 'number' : 'text';
+                        element.name = field.name;
+                        break;
+                    case 'dropdown':
+                        element = document.createElement('select');
+                        element.name = field.name;
+                        field.variants.forEach(variant => {
+                            const option = document.createElement('option');
+                            option.value = variant.value;
+                            option.textContent = variant.text;
+                            element.appendChild(option);
+                        });
+                        break;
+                    case 'radio':
+                        element = document.createDocumentFragment();
+                        field.variants.forEach(variant => {
+                            const label = document.createElement('label');
+                            const radio = document.createElement('input');
+                            radio.type = 'radio';
+                            radio.name = field.name;
+                            radio.value = variant.value;
+                            label.appendChild(radio);
+                            label.appendChild(document.createTextNode(variant.text));
+                            element.appendChild(label);
+                        });
+                        break;
+                    case 'check':
+                        element = document.createElement('input');
+                        element.type = 'checkbox';
+                        element.name = field.name;
+                        break;
+                    case 'memo':
+                        element = document.createElement('textarea');
+                        element.name = field.name;
+                        break;
+                    case 'submit':
+                        element = document.createElement('input');
+                        element.type = 'submit';
+                        element.value = field.caption;
+                        break;
+                }
+                if (field.label) {
+                    const label = document.createElement('label');
+                    label.textContent = field.label;
+                    form.appendChild(label);
+                }
+                form.appendChild(element);
+                form.appendChild(document.createElement('br'));
+            });
+        }
+
+        function fetchFormDefinition(url, formId) {
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    const form = document.getElementById(formId);
+                    createForm(form, data);
+                })
+                .catch(error => console.error('Error fetching form definition:', error));
+        }
+
+        fetchFormDefinition('https://fe.it-academy.by/Examples/dyn_form_ajax/formDef1.json', 'form1');
+        fetchFormDefinition('https://fe.it-academy.by/Examples/dyn_form_ajax/formDef2.json', 'form2');
+    </script>
+</body>
+</html>
