@@ -1,11 +1,13 @@
 import { DictionaryStorage } from './dictionaryStorage.js';
 import { createModal } from './modal.js';
 
+// Create an instance of DictionaryStorage
 const dictionaryStorage = new DictionaryStorage('dictionaryStorage');
-let wordToDelete = '';
-let currentCategory = localStorage.getItem('currentCategory') || '';
-let scrollPosition = 0;
+let wordToDelete = ''; // Variable to store the word to be deleted
+let currentCategory = ''; // Variable to store the current category filter
+let scrollPosition = 0; // Variable to store the scroll position
 
+// Function to update the content of an output element
 function updateOutput(content, outputSelector) {
     let output = document.querySelector(outputSelector);
     output.innerHTML = content;
@@ -17,6 +19,7 @@ function updateOutput(content, outputSelector) {
     }
 }
 
+// Function to update the list of items
 function updateList(items, listSelector) {
     let listContainer = document.querySelector(listSelector);
     let list = listContainer.querySelector('ul');
@@ -28,9 +31,9 @@ function updateList(items, listSelector) {
     listContainer.classList.add('show');
 }
 
+// Function to list words based on the selected category
 function listWords(category = '') {
     currentCategory = category;
-    localStorage.setItem('currentCategory', currentCategory);
     let words;
     if (category) {
         words = dictionaryStorage.getWordsByCategory(category);
@@ -62,6 +65,7 @@ function listWords(category = '') {
     updateCategoryFilter();
 }
 
+// Function to update the category filter dropdown
 function updateCategoryFilter() {
     const categories = new Set(dictionaryStorage.getWords().map(word => dictionaryStorage.getWord(word).category));
     const categoryFilter = document.getElementById('category-filter');
@@ -75,6 +79,7 @@ function updateCategoryFilter() {
     categoryFilter.value = currentCategory;
 }
 
+// Function to show the delete confirmation modal
 window.showDeleteModal = function(word, triggerElement) {
     wordToDelete = word;
     const content = `
@@ -112,6 +117,7 @@ window.showDeleteModal = function(word, triggerElement) {
     }, 'Yes', 'No', triggerElement);
 };
 
+// Function to show the edit modal
 window.showEditModal = function(word, triggerElement) {
     scrollPosition = window.scrollY; // Save the current scroll position
     history.scrollRestoration = 'manual'; // Disable automatic scroll restoration
@@ -164,15 +170,18 @@ window.showEditModal = function(word, triggerElement) {
     }, 'Save', 'Cancel', triggerElement);
 }
 
+// Event handler for listing all words
 document.getElementById('list-words').onclick = function() {
     listWords();
 };
 
+// Event handler for changing the category filter
 document.getElementById('category-filter').onchange = function() {
     const category = this.value;
     listWords(category);
 };
 
+// Event handler for adding a new word
 document.getElementById('add-word').onclick = function() {
     const word = prompt("Enter the word:");
     if (!word) return;
@@ -190,6 +199,6 @@ document.getElementById('add-word').onclick = function() {
     updateCategoryFilter();
 };
 
-// Initial load
+// Initial load of words and category filter
 listWords(currentCategory);
 updateCategoryFilter();

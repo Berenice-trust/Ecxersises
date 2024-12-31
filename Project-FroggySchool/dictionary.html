@@ -7,10 +7,14 @@
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+    <!-- Load the header script -->
     <script src="loadHeader.js"></script>
     <div class="container">
+        <!-- Button to add a new word -->
         <button id="add-word">Add Word</button>
+        <!-- Button to list all words -->
         <button id="list-words">List All Words</button>
+        <!-- Dropdown to filter words by category -->
         <select id="category-filter">
             <option value="">All Categories</option>
             <option value="Fruits">Fruits</option>
@@ -18,14 +22,16 @@
             <option value="Animals">Animals</option>
         </select>
 
+        <!-- Output area for word details -->
         <div class="output word-output"></div>
+        <!-- Output area for the word list -->
         <div class="output word-list">
             <h2>Word List</h2>
             <ul></ul>
         </div>
     </div>
 
-    <!-- Удалите существующее модальное окно -->
+    <!-- Remove the existing modal window -->
     <!-- <div class="modal" id="delete-modal">
         <div class="modal-content">
             <p>Are you sure you want to delete this word?</p>
@@ -34,6 +40,8 @@
         </div>
     </div> -->
 
+    <!-- Import Firebase configuration and scripts -->
+    <script type="module" src="firebaseConfig.js"></script>
     <script type="module" src="dictionaryStorage.js"></script>
     <script type="module" src="dictionary.js"></script>
     <script type="module" src="modal.js"></script>
