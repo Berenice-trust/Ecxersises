@@ -236,3 +236,10 @@ li {
   border-radius: 5px;
 }
 
+.modal-css {
+    max-width: 600px;
+    width: 80%;
+    height: auto;
+    overflow-y: auto;
+}
+

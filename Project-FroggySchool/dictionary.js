@@ -82,9 +82,8 @@ function updateCategoryFilter() {
 // Function to show the delete confirmation modal
 window.showDeleteModal = function(word, triggerElement) {
     wordToDelete = word;
-    const content = `
-        <p>Are you sure you want to delete this word?</p>
-    `;
+    const content = `<p>Are you sure you want to delete this word?</p>`;
+
     createModal('delete-modal', content, () => {
         const result = dictionaryStorage.deleteWord(wordToDelete);
         if (result) {
@@ -119,8 +118,7 @@ window.showDeleteModal = function(word, triggerElement) {
 
 // Function to show the edit modal
 window.showEditModal = function(word, triggerElement) {
-    scrollPosition = window.scrollY; // Save the current scroll position
-    history.scrollRestoration = 'manual'; // Disable automatic scroll restoration
+    saveScrollPosition();
     const data = dictionaryStorage.getWord(word);
     const content = `
         <label>Word: <input type="text" id="edit-word" value="${word}"></label>
@@ -163,11 +161,22 @@ window.showEditModal = function(word, triggerElement) {
             message.textContent = '';
         }, 3000);
 
-        window.scrollTo(0, scrollPosition); // Restore the scroll position
+        restoreScrollPosition();
     }, () => {
         // Cancel action
-        window.scrollTo(0, scrollPosition); // Restore the scroll position
+        restoreScrollPosition();
     }, 'Save', 'Cancel', triggerElement);
+}
+
+// Function to save the current scroll position
+function saveScrollPosition() {
+    scrollPosition = window.scrollY;
+    history.scrollRestoration = 'manual';
+}
+
+// Function to restore the saved scroll position
+function restoreScrollPosition() {
+    window.scrollTo(0, scrollPosition);
 }
 
 // Event handler for listing all words
@@ -194,9 +203,22 @@ document.getElementById('add-word').onclick = function() {
 
     const data = { translation, example, category, imageUrl, audioUrl };
 
-    dictionaryStorage.addWord(word, data);
-    listWords(currentCategory);
-    updateCategoryFilter();
+    const content = `
+        <label>Word: <input type="text" id="edit-word" value="${word}"></label>
+        <label>Translation: <input type="text" id="edit-translation" value="${translation}"></label>
+        <label>Example: <input type="text" id="edit-example" value="${example}"></label>
+        <label>Category: <input type="text" id="edit-category" value="${category}"></label>
+        <label>Image URL: <input type="text" id="edit-imageUrl" value="${imageUrl || ''}"></label>
+        <label>Audio URL: <input type="text" id="edit-audioUrl" value="${audioUrl || ''}"></label>
+    `;
+
+    createModal('add-modal', content, () => {
+        dictionaryStorage.addWord(word, data);
+        listWords(currentCategory);
+        updateCategoryFilter();
+    }, () => {
+        // Cancel action
+    }, 'Add', 'Cancel', document.getElementById('add-word'));
 };
 
 // Initial load of words and category filter
