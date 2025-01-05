@@ -88,6 +88,7 @@ h2 {
 ul {
   list-style-type: none;
   padding-left: 0;
+  padding-bottom: 0;
 }
 
 li {
@@ -109,9 +110,9 @@ li {
   border-radius: var(--border-radius);
   box-shadow: var(--box-shadow);
   padding: var(--padding);
-  margin: 10px 0;
+  margin: 15px 0; /* Add top and bottom margin */
   position: relative;
-  transition: all 0.3s ease;
+  transition: all 3s ease;
 }
 
 .card h3 {
@@ -241,5 +242,9 @@ li {
     width: 80%;
     height: auto;
     overflow-y: auto;
+}
+
+.highlight-success {
+  border: 2px solid green;
 }
 

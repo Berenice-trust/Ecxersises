@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Audio Upload</title>
+</head>
+<body>
+    <input type="file" id="audio-file-input" accept="audio/*">
+    <button id="upload-button" disabled>Upload and Play</button>
+    <audio id="audio-player" controls></audio>
+
+    <!-- Подключаем конфигурацию Firebase и скрипты -->
+    <script type="module" src="firebaseConfig.js"></script>
+    <script type="module">
+        import { getDatabase, ref, set, get, child } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-database.js";
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
+        import firebaseConfig from './firebaseConfig.js';
+
+        // Инициализируем Firebase и базу данных
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        const audioFileInput = document.getElementById('audio-file-input');
+        const uploadButton = document.getElementById('upload-button');
+        const audioPlayer = document.getElementById('audio-player');
+        let audioFile;
+
+        // Проверяем наличие сохраненного аудиофайла при загрузке страницы
+        document.addEventListener('DOMContentLoaded', async () => {
+            const savedAudioUrl = await checkAndGetAudioUrl('saved_audio');
+            if (savedAudioUrl) {
+                audioPlayer.src = savedAudioUrl;
+                audioPlayer.play();
+            }
+        });
+
+        audioFileInput.addEventListener('change', (event) => {
+            audioFile = event.target.files[0];
+            uploadButton.disabled = !audioFile;
+        });
+
+        uploadButton.addEventListener('click', async () => {
+            if (audioFile) {
+                const audioBase64 = await fileToBase64(audioFile);
+                await saveAudioToFirebase('saved_audio', audioBase64);
+                const audioUrl = `data:audio/webm;base64,${audioBase64}`;
+                audioPlayer.src = audioUrl;
+                audioPlayer.play();
+            }
+        });
+
+        function fileToBase64(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = () => {
+                    const base64String = reader.result.split(',')[1];
+                    resolve(base64String);
+                };
+                reader.onerror = error => reject(error);
+            });
+        }
+
+        async function checkAndGetAudioUrl(fileName) {
+            try {
+                const audioRef = ref(db, `audio/${fileName}`);
+                const snapshot = await get(audioRef);
+                if (snapshot.exists()) {
+                    const base64String = snapshot.val();
+                    const audioUrl = `data:audio/webm;base64,${base64String}`;
+                    console.log('Аудиофайл найден в Firebase Database:', audioUrl);
+                    return audioUrl;
+                } else {
+                    console.log('Аудиофайл не найден в Firebase Database');
+                    return null;
+                }
+            } catch (error) {
+                console.error('Ошибка проверки аудиофайла в Firebase Database:', error);
+                return null;
+            }
+        }
+
+        function sanitizeFileName(fileName) {
+            return fileName.replace(/[.#$[\]]/g, '_');
+        }
+
+        async function saveAudioToFirebase(fileName, base64String) {
+            try {
+                const audioRef = ref(db, `audio/${fileName}`);
+                await set(audioRef, base64String);
+                console.log('Аудиофайл сохранен в Firebase Database');
+            } catch (error) {
+                console.error('Ошибка сохранения аудиоданных в Firebase Database:', error);
+                alert('Ошибка сохранения аудиоданных в Firebase Database. Пожалуйста, попробуйте еще раз.');
+            }
+        }
+    </script>
+</body>
+</html>

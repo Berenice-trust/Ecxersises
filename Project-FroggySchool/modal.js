@@ -1,3 +1,13 @@
+import { getDatabase, ref, set, get } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-database.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
+import firebaseConfig from './firebaseConfig.js';
+import { dictionaryStorage } from './dictionaryStorage.js';
+import { fileToBase64 } from './fileUtils.js'; // Импортируем функцию из fileUtils.js
+
+// Инициализируем Firebase и базу данных
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+
 // Функция для создания модального окна
 export function createModal(modalId, content, confirmCallback, cancelCallback, confirmText = 'Save', cancelText = 'Cancel', triggerElement) {
     // Создаем элемент модального окна
@@ -22,6 +32,34 @@ export function createModal(modalId, content, confirmCallback, cancelCallback, c
     // Получаем элементы модального окна
     const modalContent = modal.querySelector('.modal-content');
     const modalBody = modal.querySelector('.modal-body');
+    const audioFileInput = modal.querySelector(`#audio-file-input-${modalId}`);
+    const uploadButton = modal.querySelector(`#upload-button-${modalId}`);
+    const audioPlayer = modal.querySelector(`#audio-player-${modalId}`);
+    let audioFile;
+    let audioBase64 = '';
+
+    // Проверяем наличие сохраненного аудиофайла при загрузке модального окна
+    const wordInput = document.getElementById('edit-word');
+    if (wordInput) {
+        const word = wordInput.value;
+        checkAndLoadAudio(word, audioPlayer);
+    }
+
+    if (audioFileInput) {
+        audioFileInput.addEventListener('change', (event) => {
+            audioFile = event.target.files[0];
+            uploadButton.disabled = !audioFile;
+        });
+
+        uploadButton.addEventListener('click', async () => {
+            if (audioFile) {
+                audioBase64 = await fileToBase64(audioFile);
+                const audioUrl = `data:audio/webm;base64,${audioBase64}`;
+                audioPlayer.src = audioUrl;
+                audioPlayer.play();
+            }
+        });
+    }
 
     // Получаем координаты элемента, вызвавшего модальное окно
     const triggerRect = triggerElement.getBoundingClientRect();
@@ -45,7 +83,7 @@ export function createModal(modalId, content, confirmCallback, cancelCallback, c
     // Устанавливаем анимацию для модального окна
     requestAnimationFrame(() => {
         modalContent.style.left = '50%';
-        modalContent.style.top = '30%'; // Останавливаем выше на экране
+        modalContent.style.top = '50%'; // Опускаем ниже на экране
         modalContent.style.width = '80%';
         modalContent.style.maxWidth = '600px';
         modalContent.style.height = 'auto';
@@ -58,7 +96,12 @@ export function createModal(modalId, content, confirmCallback, cancelCallback, c
     });
 
     // Добавляем обработчики событий для кнопок подтверждения и отмены
-    document.getElementById(`confirm-${modalId}`).addEventListener('click', () => {
+    document.getElementById(`confirm-${modalId}`).addEventListener('click', async () => {
+        const word = wordInput ? wordInput.value : '';
+        if (audioFile) {
+            audioBase64 = await fileToBase64(audioFile);
+            await dictionaryStorage.saveAudio(word, audioFile); // Передаем файл напрямую
+        }
         confirmCallback();
         closeModal(modalId);
     });
@@ -82,5 +125,20 @@ export function closeModal(modalId) {
         setTimeout(() => {
             modal.remove();
         }, 1000); // Соответствие длительности перехода
+    }
+}
+
+async function checkAndLoadAudio(word, audioPlayer) {
+    try {
+        const base64String = await dictionaryStorage.loadAudio(word);
+        if (base64String) {
+            const audioUrl = `data:audio/webm;base64,${base64String}`;
+            audioPlayer.src = audioUrl;
+            console.log('Аудиофайл загружен из Firebase Database');
+        } else {
+            console.log('Аудиофайл не найден в Firebase Database');
+        }
+    } catch (error) {
+        console.error('Ошибка загрузки аудиофайла из Firebase Database:', error);
     }
 }

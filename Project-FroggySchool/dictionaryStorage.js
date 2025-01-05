@@ -1,6 +1,7 @@
 import { getDatabase, ref, set, get, child } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-database.js";
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
 import firebaseConfig from './firebaseConfig.js';
+import { fileToBase64 } from './fileUtils.js';
 
 // Initialize Firebase app and database
 const app = initializeApp(firebaseConfig);
@@ -78,76 +79,42 @@ export class DictionaryStorage {
         }
         return false;
     }
-}
 
-// Create an instance for the dictionary
-const dictionaryStorage = new DictionaryStorage('dictionaryStorage');
-
-// Initial words to populate the dictionary
-const initialWords = [
-    {
-        word: "apple",
-        data: {
-            translation: "яблоко",
-            example: "I eat an apple every day.",
-            category: "Fruits",
-            imageUrl: "https://example.com/apple.jpg",
-            audioUrl: "https://example.com/apple.mp3"
-        }
-    },
-    {
-        word: "banana",
-        data: {
-            translation: "банан",
-            example: "Bananas are yellow.",
-            category: "Fruits",
-            imageUrl: "https://example.com/banana.jpg",
-            audioUrl: "https://example.com/banana.mp3"
-        }
-    },
-    {
-        word: "car",
-        data: {
-            translation: "машина",
-            example: "I drive a car.",
-            category: "Vehicles",
-            imageUrl: "https://example.com/car.jpg",
-            audioUrl: "https://example.com/car.mp3"
-        }
-    },
-    {
-        word: "bicycle",
-        data: {
-            translation: "велосипед",
-            example: "I ride a bicycle.",
-            category: "Vehicles",
-            imageUrl: "https://example.com/bicycle.jpg",
-            audioUrl: "https://example.com/bicycle.mp3"
-        }
-    },
-    {
-        word: "dog",
-        data: {
-            translation: "собака",
-            example: "The dog is barking.",
-            category: "Animals",
-            imageUrl: "https://example.com/dog.jpg",
-            audioUrl: "https://example.com/dog.mp3"
-        }
-    },
-    {
-        word: "cat",
-        data: {
-            translation: "кошка",
-            example: "The cat is sleeping.",
-            category: "Animals",
-            imageUrl: "https://example.com/cat.jpg",
-            audioUrl: "https://example.com/cat.mp3"
+    // Save audio data for a specific word to Firebase
+    async saveAudio(word, file) {
+        try {
+            if (!(file instanceof Blob)) {
+                throw new TypeError("Argument must be an instance of Blob");
+            }
+            const base64String = await fileToBase64(file);
+            const audioRef = ref(this.db, `${this.storageKey}/${word}/audioUrl`);
+            await set(audioRef, base64String);
+            console.log('Audio file saved to Firebase Database');
+            return base64String;
+        } catch (error) {
+            console.error('Error saving audio data to Firebase Database:', error);
+            return null;
         }
     }
-];
 
-// Add initial words to the dictionary
-initialWords.forEach(item => {
-    dictionaryStorage.addWord(item.word, item.data);
-});
+    // Load audio data for a specific word from Firebase
+    async loadAudio(word) {
+        try {
+            const audioRef = ref(this.db, `${this.storageKey}/${word}/audioUrl`);
+            const snapshot = await get(audioRef);
+            if (snapshot.exists()) {
+                return snapshot.val();
+            } else {
+                console.log('Audio file not found in Firebase Database');
+                return null;
+            }
+        } catch (error) {
+            console.error('Error loading audio data from Firebase Database:', error);
+            return null;
+        }
+    }
+}
+
+// Экспортируем экземпляр для использования в других файлах
+export const dictionaryStorage = new DictionaryStorage('dictionaryStorage');
+
