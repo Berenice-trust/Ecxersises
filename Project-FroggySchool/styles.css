@@ -248,3 +248,22 @@ li {
   border: 2px solid green;
 }
 
+.loading-spinner {
+  width: 50px; /* Устанавливаем ширину */
+  height: 50px; /* Устанавливаем высоту */
+  border: 5px solid #f3f3f3; /* Устанавливаем цвет границы */
+  border-top: 5px solid var(--primary-color); /* Устанавливаем цвет верхней границы */
+  border-radius: 50%; /* Делаем границы круглыми */
+  animation: spin 1s linear infinite; /* Анимация вращения */
+  position: fixed; /* Фиксированное положение для центрирования на экране */
+  top: 50%; /* Центрирование по вертикали */
+  left: 50%; /* Центрирование по горизонтали */
+  transform: translate(-50%, -50%); /* Центрирование с помощью трансформации */
+  z-index: 1000; /* Устанавливаем высокий z-index, чтобы спиннер был поверх всего */
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+

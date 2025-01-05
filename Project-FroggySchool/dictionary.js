@@ -6,6 +6,8 @@ const dictionaryStorage = new DictionaryStorage('dictionaryStorage');
 let wordToDelete = ''; // Variable to store the word to be deleted
 let currentCategory = ''; // Variable to store the current category filter
 let isLoading = false; // Flag to prevent multiple simultaneous loads
+let currentPage = 1; // Variable to store the current page
+const itemsPerPage = 20; // Number of items per page
 
 // Function to update the content of an output element
 function updateOutput(content, outputSelector) {
@@ -31,9 +33,29 @@ function updateList(items, listSelector) {
     listContainer.classList.add('show');
 }
 
+// Function to show the loading spinner
+function showLoadingSpinner() {
+    const spinner = document.getElementById('loading-spinner');
+    if (spinner) {
+        spinner.style.display = 'block';
+    }
+}
+
+// Function to hide the loading spinner
+function hideLoadingSpinner() {
+    const spinner = document.getElementById('loading-spinner');
+    if (spinner) {
+        spinner.style.display = 'none';
+    }
+}
+
 // Function to list words based on the selected category with lazy loading
-export function listWords(category = '') {
+export function listWords(category = '', page = 1) {
     currentCategory = category;
+    currentPage = page;
+    isLoading = true;
+    showLoadingSpinner(); // Show loading spinner
+
     let words;
     if (category) {
         words = dictionaryStorage.getWordsByCategory(category);
@@ -41,9 +63,15 @@ export function listWords(category = '') {
         words = dictionaryStorage.getWords();
     }
     const wordList = document.querySelector('.word-list ul');
-    wordList.innerHTML = '';
+    if (page === 1) {
+        wordList.innerHTML = '';
+    }
 
-    words.forEach(word => {
+    const startIndex = (page - 1) * itemsPerPage;
+    const endIndex = Math.min(startIndex + itemsPerPage, words.length);
+    const paginatedWords = words.slice(startIndex, endIndex);
+
+    paginatedWords.forEach(word => {
         const data = dictionaryStorage.getWord(word);
         const card = createCard(word, data);
         wordList.appendChild(card);
@@ -52,6 +80,7 @@ export function listWords(category = '') {
     document.querySelector('.word-list').classList.add('show');
     updateCategoryFilter();
     isLoading = false; // Reset loading flag
+    hideLoadingSpinner(); // Hide loading spinner
 }
 
 // Function to create a card element
@@ -165,7 +194,7 @@ async function handleConfirm(isEdit, word, data) {
             card.classList.remove('highlight-success');
         }, 3000);
     } else {
-        listWords(currentCategory);
+        listWords(currentCategory, currentPage);
     }
 }
 
@@ -249,6 +278,7 @@ updateCategoryFilter();
 window.addEventListener('scroll', () => {
     if (window.innerHeight + window.scrollY >= document.body.offsetHeight - 500 && !isLoading) {
         isLoading = true;
-        listWords(currentCategory);
+        currentPage++;
+        listWords(currentCategory, currentPage);
     }
 });
