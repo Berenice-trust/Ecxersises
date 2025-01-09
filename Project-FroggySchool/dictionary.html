@@ -6,6 +6,7 @@
   <title>Personal Dictionary</title>
   <link rel="stylesheet" href="styles.css">
   <link rel="icon" href="/favicon_io/favicon.ico" type="image/x-icon">
+  
 </head>
 <body>
     <!-- Load the header -->
@@ -13,12 +14,14 @@
     <script src="loadHeader.js"></script>
     <div class="container">
         <a id="top"></a> <!-- Якорь для прокрутки вверх -->
+        <!-- User info -->
+        <div id="user-info"></div>
         <!-- Button to add a new word -->
         <button id="add-word">Add Word</button>
         <!-- Button to list all words -->
         <button id="list-words">List All Words</button>
         <!-- Dropdown to filter words by category -->
-        <select id="category-filter">
+        <select id="category-filter" title="Filter by category">
             <option value="">All Categories</option>
             <option value="Fruits">Fruits</option>
             <option value="Vehicles">Vehicles</option>
@@ -41,9 +44,9 @@
     <a href="#top" id="scroll-to-top" class="scroll-to-top">↑</a>
 
     <!-- Import Firebase configuration and scripts -->
-    <script type="module" src="firebaseConfig.js"></script>
-    <script type="module" src="dictionaryStorage.js"></script>
-    <script type="module" src="dictionary.js"></script>
+    <script type="module" src="./firebaseConfig.js"></script>
+    <script type="module" src="./dictionaryStorage.js"></script>
+    <script type="module" src="./dictionary.js"></script>
     <script type="module" src="modal.js"></script>
     <script type="module" src="init.js"></script>
     <script src="scrollToTop.js"></script> <!-- Подключаем скрипт для логики скролла -->

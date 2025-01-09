@@ -271,20 +271,20 @@ li {
     position: fixed;
     bottom: 20px;
     right: 20px;
-    background-color: #007bff;
-    color: white;
-    padding: 10px;
+    background-color: var(--primary-color);
+    color: var(--background-color);
+    /* padding: 6px; */
     border-radius: 50%;
     text-align: center;
     text-decoration: none;
-    font-size: 18px; /* Уменьшаем размер шрифта */
+    font-size: 24px; /* Уменьшаем размер шрифта */
     z-index: 1000;
     opacity: 0;
     transition: opacity 3s ease; /* Изменяем время перехода на 3 секунды */
     width: 40px; /* Уменьшаем ширину */
     height: 40px; /* Уменьшаем высоту */
-    line-height: 40px; /* Центрируем текст по вертикали */
-    font-weight: bold; /* Делаем стрелку толще */
+    line-height: 35px; /* Центрируем текст по вертикали */
+    font-weight:bold; /* Делаем стрелку толще */
 }
 
 .scroll-to-top.show {
@@ -292,6 +292,6 @@ li {
 }
 
 .scroll-to-top:hover {
-    background-color: #0056b3;
+    background-color: var(--primary-color-hover);
 }
 
