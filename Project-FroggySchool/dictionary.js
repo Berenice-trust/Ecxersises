@@ -227,7 +227,6 @@ window.showEditModal = function(word, triggerElement) {
         <label>Image URL: <input type="text" id="edit-imageUrl" value="${data.imageUrl || ''}"></label>
         <input type="file" id="audio-file-input-edit-modal" accept="audio/*">
         <button id="upload-button-edit-modal" disabled>Upload Audio</button>
-        <audio id="audio-player-edit-modal" controls></audio>
     `;
 
     createModal('edit-modal', content, () => handleConfirm(true, word, data), handleEditCancel, 'Save', 'Cancel', triggerElement);
@@ -243,7 +242,6 @@ window.showAddModal = function(triggerElement) {
         <label>Image URL: <input type="text" id="edit-imageUrl" value=""></label>
         <input type="file" id="audio-file-input-add-modal" accept="audio/*">
         <button id="upload-button-add-modal" disabled>Upload Audio</button>
-        <audio id="audio-player-add-modal" controls></audio>
     `;
 
     createModal('add-modal', content, () => handleConfirm(false, '', null), handleAddCancel, 'Save', 'Cancel', triggerElement);

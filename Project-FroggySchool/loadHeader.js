@@ -1,8 +1,13 @@
-document.addEventListener("DOMContentLoaded", function() {
+document.addEventListener('DOMContentLoaded', () => {
     fetch('header.html')
-        .then(response => response.text())
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.text();
+        })
         .then(data => {
-            document.body.insertAdjacentHTML('afterbegin', data);
+            document.getElementById('header-placeholder').innerHTML = data;
         })
         .catch(error => console.error('Error loading header:', error));
 });

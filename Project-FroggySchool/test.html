@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Test Audio Upload</title>
+    <title>Test Audio Record</title>
 </head>
 <body>
     <input type="file" id="audio-file-input" accept="audio/*">
@@ -15,56 +15,26 @@
     <!-- Подключаем конфигурацию Firebase и скрипты -->
     <script type="module" src="firebaseConfig.js"></script>
     <script type="module">
-        import { getDatabase, ref, get } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-database.js";
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js";
         import firebaseConfig from './firebaseConfig.js';
         import { AudioRecorder } from './audioRecorder.js';
+        import { dictionaryStorage } from './dictionaryStorage.js';
 
-        // Инициализируем Firebase и базу данных
+        // Инициализируем Firebase
         const app = initializeApp(firebaseConfig);
-        const db = getDatabase(app);
 
         // Инициализируем AudioRecorder
-        const audioRecorder = new AudioRecorder('audio-player', 'record-button', 'stop-button', 'upload-button', 'audio-file-input');
+        const audioRecorder = new AudioRecorder('audio-player', 'record-button', 'stop-button', 'upload-button', 'audio-file-input', 'test');
 
         // Проверяем наличие сохраненного аудиофайла при загрузке страницы
         document.addEventListener('DOMContentLoaded', async () => {
-            const savedAudioUrl = await checkAndGetAudioUrl('saved_audio');
-            if (savedAudioUrl) {
-                audioRecorder.audioPlayer.src = savedAudioUrl;
-                // Убираем автоплей
-                // audioRecorder.audioPlayer.play().catch(error => {
-                //     if (error.name === 'NotAllowedError') {
-                //         alert('Пожалуйста, взаимодействуйте с документом перед воспроизведением аудиофайла.');
-                //     } else {
-                //         console.error('Ошибка воспроизведения аудиофайла:', error);
-                //     }
-                // });
+            const word = 'test'; // Используем слово "test"
+            const savedAudioBase64 = await dictionaryStorage.loadAudio(word);
+            if (savedAudioBase64) {
+                const audioUrl = `data:audio/webm;base64,${savedAudioBase64}`;
+                audioRecorder.audioPlayer.src = audioUrl;
             }
         });
-
-        async function checkAndGetAudioUrl(fileName) {
-            try {
-                const audioRef = ref(db, `audio/${sanitizeFileName(fileName)}`);
-                const snapshot = await get(audioRef);
-                if (snapshot.exists()) {
-                    const base64String = snapshot.val();
-                    const audioUrl = `data:audio/webm;base64,${base64String}`;
-                    console.log('Аудиофайл найден в Firebase Database:', audioUrl);
-                    return audioUrl;
-                } else {
-                    console.log('Аудиофайл не найден в Firebase Database');
-                    return null;
-                }
-            } catch (error) {
-                console.error('Ошибка проверки аудиофайла в Firebase Database:', error);
-                return null;
-            }
-        }
-
-        function sanitizeFileName(fileName) {
-            return fileName.replace(/[.#$[\]]/g, '_');
-        }
     </script>
 </body>
 </html>

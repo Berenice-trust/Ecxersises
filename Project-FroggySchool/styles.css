@@ -267,3 +267,31 @@ li {
   100% { transform: rotate(360deg); }
 }
 
+.scroll-to-top {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background-color: #007bff;
+    color: white;
+    padding: 10px;
+    border-radius: 50%;
+    text-align: center;
+    text-decoration: none;
+    font-size: 18px; /* Уменьшаем размер шрифта */
+    z-index: 1000;
+    opacity: 0;
+    transition: opacity 3s ease; /* Изменяем время перехода на 3 секунды */
+    width: 40px; /* Уменьшаем ширину */
+    height: 40px; /* Уменьшаем высоту */
+    line-height: 40px; /* Центрируем текст по вертикали */
+    font-weight: bold; /* Делаем стрелку толще */
+}
+
+.scroll-to-top.show {
+    opacity: 1; /* Устанавливаем видимость */
+}
+
+.scroll-to-top:hover {
+    background-color: #0056b3;
+}
+

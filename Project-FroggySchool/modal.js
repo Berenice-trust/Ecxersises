@@ -3,6 +3,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/11.1.0/firebas
 import firebaseConfig from './firebaseConfig.js';
 import { dictionaryStorage } from './dictionaryStorage.js';
 import { fileToBase64 } from './fileUtils.js'; // Импортируем функцию из fileUtils.js
+import { AudioRecorder } from './audioRecorder.js'; // Импортируем класс AudioRecorder
 
 // Инициализируем Firebase и базу данных
 const app = initializeApp(firebaseConfig);
@@ -20,6 +21,12 @@ export function createModal(modalId, content, confirmCallback, cancelCallback, c
         <div class="modal-content">
             <div class="modal-body">
                 ${content}
+                ${modalId !== 'delete-modal' ? `
+                <div class="audio-recorder">
+                    <button id="record-button-${modalId}">Record</button>
+                    <button id="stop-button-${modalId}" disabled>Stop</button>
+                    <audio id="audio-player-${modalId}" controls></audio>
+                </div>` : ''}
                 <button id="confirm-${modalId}">${confirmText}</button>
                 <button id="cancel-${modalId}">${cancelText}</button>
             </div>
@@ -42,7 +49,7 @@ export function createModal(modalId, content, confirmCallback, cancelCallback, c
     const wordInput = document.getElementById('edit-word');
     if (wordInput) {
         const word = wordInput.value;
-        checkAndLoadAudio(word, audioPlayer);
+        checkAndLoadAudio(word, audioPlayer).catch(error => console.error('Error loading audio:', error));
     }
 
     if (audioFileInput) {
@@ -52,13 +59,27 @@ export function createModal(modalId, content, confirmCallback, cancelCallback, c
         });
 
         uploadButton.addEventListener('click', async () => {
-            if (audioFile) {
-                audioBase64 = await fileToBase64(audioFile);
-                const audioUrl = `data:audio/webm;base64,${audioBase64}`;
-                audioPlayer.src = audioUrl;
-                audioPlayer.play();
+            try {
+                if (audioFile) {
+                    audioBase64 = await fileToBase64(audioFile);
+                    const audioUrl = `data:audio/webm;base64,${audioBase64}`;
+                    audioPlayer.src = audioUrl;
+                    audioPlayer.play();
+                }
+            } catch (error) {
+                console.error('Error uploading audio file:', error);
             }
         });
+    }
+
+    // Инициализируем AudioRecorder
+    if (modalId !== 'delete-modal') {
+        const audioRecorder = new AudioRecorder(`audio-player-${modalId}`, `record-button-${modalId}`, `stop-button-${modalId}`, `upload-button-${modalId}`, `audio-file-input-${modalId}`, wordInput ? wordInput.value : '');
+
+        // Сохраняем записанное аудио в переменную
+        audioRecorder.onStopRecording = (audioBlob) => {
+            recordedAudioBlob = audioBlob;
+        };
     }
 
     // Получаем координаты элемента, вызвавшего модальное окно
@@ -97,18 +118,21 @@ export function createModal(modalId, content, confirmCallback, cancelCallback, c
 
     // Добавляем обработчики событий для кнопок подтверждения и отмены
     document.getElementById(`confirm-${modalId}`).addEventListener('click', async () => {
-        const word = wordInput ? wordInput.value : '';
-        if (audioFile) {
-            audioBase64 = await fileToBase64(audioFile);
-            await dictionaryStorage.saveAudio(word, audioFile); // Передаем файл напрямую
+        try {
+            confirmCallback();
+            closeModal(modalId);
+        } catch (error) {
+            console.error('Error confirming action:', error);
         }
-        confirmCallback();
-        closeModal(modalId);
     });
 
     document.getElementById(`cancel-${modalId}`).addEventListener('click', () => {
-        cancelCallback();
-        closeModal(modalId);
+        try {
+            cancelCallback();
+            closeModal(modalId);
+        } catch (error) {
+            console.error('Error cancelling action:', error);
+        }
     });
 
     // Отображаем модальное окно
