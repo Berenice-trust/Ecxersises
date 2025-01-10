@@ -129,6 +129,23 @@ export class DictionaryStorage {
             return null;
         }
     }
+
+    // Delete audio data for a specific word from Firebase
+    async deleteAudio(word) {
+        if (!this.username) {
+            console.error('User is not authenticated');
+            return null;
+        }
+        try {
+            const audioRef = ref(this.db, `dictionaryStorage_${this.username}/${word}/audioUrl`);
+            await set(audioRef, null);
+            console.log('Audio file deleted from Firebase Database');
+            return true;
+        } catch (error) {
+            console.error('Error deleting audio data from Firebase Database:', error);
+            return false;
+        }
+    }
 }
 
 // Экспортируем экземпляр для использования в других файлах

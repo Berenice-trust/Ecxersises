@@ -201,16 +201,24 @@ async function handleConfirm(isEdit, word, data) {
         audioUrl: data ? data.audioUrl : '' // Сохраняем существующий аудиофайл для редактирования
     };
 
-    const audioFileInput = document.getElementById(`audio-file-input-${isEdit ? 'edit' : 'add'}-modal`);
-    const audioFile = audioFileInput.files[0];
-    if (audioFile) {
-        const audioBase64 = await dictionaryStorage.saveAudio(newWord, audioFile);
-        updatedData.audioUrl = audioBase64;
+    // Check if the delete audio checkbox is checked
+    const deleteAudioCheckbox = document.getElementById('delete-audio-checkbox');
+    if (deleteAudioCheckbox && deleteAudioCheckbox.checked) {
+        await dictionaryStorage.deleteAudio(newWord);
+        updatedData.audioUrl = '';
+    } else {
+        const audioFileInput = document.getElementById(`audio-file-input-${isEdit ? 'edit' : 'add'}-modal`);
+        const audioFile = audioFileInput.files[0];
+        if (audioFile) {
+            const audioBase64 = await dictionaryStorage.saveAudio(newWord, audioFile);
+            updatedData.audioUrl = audioBase64;
+        }
     }
 
     if (isEdit && newWord !== word) {
         dictionaryStorage.deleteWord(word);
     }
+
     dictionaryStorage.addWord(newWord, updatedData);
 
     // Update the card content without reloading the entire list
@@ -280,9 +288,15 @@ window.showEditModal = function(word, triggerElement) {
         <label>Image URL: <input type="text" id="edit-imageUrl" value="${data.imageUrl || ''}" placeholder="Введите ссылку на изображение (URL)"></label>
         <label>Audio file: <input type="file" id="audio-file-input-edit-modal" accept="audio/*"></label>
         <button id="upload-button-edit-modal" disabled>Upload Audio</button>
+        ${data.audioUrl ? `<div class='audio-delete-group'><input type="checkbox" id="delete-audio-checkbox" class='delete-checkbox' ><label for='delete-audio-checkbox'> Delete Audio</label>` : ''}
     `;
 
     createModal('edit-modal', content, () => handleConfirm(true, word, data), handleEditCancel, 'Save', 'Cancel', triggerElement);
+
+    // Enable the upload button when a file is selected
+    document.getElementById('audio-file-input-edit-modal').addEventListener('change', function() {
+        document.getElementById('upload-button-edit-modal').disabled = !this.files.length;
+    });
 }
 
 // Function to show the add modal
@@ -306,6 +320,11 @@ window.showAddModal = function(triggerElement) {
     `;
 
     createModal('add-modal', content, () => handleConfirm(false, '', null), handleAddCancel, 'Save', 'Cancel', triggerElement);
+
+    // Enable the upload button when a file is selected
+    document.getElementById('audio-file-input-add-modal').addEventListener('change', function() {
+        document.getElementById('upload-button-add-modal').disabled = !this.files.length;
+    });
 }
 
 // Event handler for listing all words
