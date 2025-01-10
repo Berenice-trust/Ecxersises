@@ -91,6 +91,7 @@ function createCard(word, data) {
         <h3 data-word="${word}">${word}</h3>
         <p><strong>Translation:</strong> ${data.translation}</p>
         <p><strong>Example:</strong> ${data.example}</p>
+        <p><strong>Example Translation:</strong> ${data.exampleTranslation}</p>
         <p><strong>Category:</strong> ${data.category}</p>
         ${data.imageUrl ? `<img src="${data.imageUrl}" alt="${word}">` : ''}
         ${data.audioUrl ? `<audio controls src="data:audio/webm;base64,${data.audioUrl}"></audio>` : ''}
@@ -150,14 +151,53 @@ function handleDeleteCancel() {
     // Cancel action
 }
 
+// Function to check if the URL is valid
+function isValidUrl(url) {
+    const urlPattern = new RegExp('^(https?:\\/\\/)?'+ // protocol
+        '((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.?)+[a-z]{2,}|'+ // domain name
+        '((\\d{1,3}\\.){3}\\d{1,3}))'+ // OR ip (v4) address
+        '(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*'+ // port and path
+        '(\\?[;&a-z\\d%_.~+=-]*)?'+ // query string
+        '(\\#[-a-z\\d_]*)?$','i'); // fragment locator
+    return !!urlPattern.test(url);
+}
+
+// Function to check if the URL points to a valid image
+async function validateImageUrl(url) {
+    if (url.startsWith('data:image/')) {
+        return url; // Base64 encoded image data is considered valid
+    }
+    if (!isValidUrl(url)) {
+        console.error('Invalid URL format');
+        return null; // или 'path/to/default/image.png' для базовой картинки
+    }
+    try {
+        const response = await fetch(url);
+        if (response.ok && response.headers.get('content-type').startsWith('image/')) {
+            return url;
+        } else {
+            throw new Error('Invalid image URL');
+        }
+    } catch (error) {
+        console.error('Error validating image URL:', error);
+        return null; // или 'path/to/default/image.png' для базовой картинки
+    }
+}
+
 // Universal function to handle add/edit confirmation
 async function handleConfirm(isEdit, word, data) {
     const newWord = document.getElementById('edit-word').value;
+    const category = document.getElementById('edit-category').value;
+    let imageUrl = document.getElementById('edit-imageUrl').value;
+
+    imageUrl = await validateImageUrl(imageUrl);
+
     const updatedData = {
-        translation: document.getElementById('edit-translation').value,
-        example: document.getElementById('edit-example').value,
-        category: document.getElementById('edit-category').value,
-        imageUrl: document.getElementById('edit-imageUrl').value,
+        translation: document.getElementById('edit-translation').value || '',
+        example: document.getElementById('edit-example').value || '',
+        exampleTranslation: document.getElementById('edit-example-translation').value || '',
+        category: category || '',
+        imageUrl: imageUrl || '',
         audioUrl: data ? data.audioUrl : '' // Сохраняем существующий аудиофайл для редактирования
     };
 
@@ -180,6 +220,7 @@ async function handleConfirm(isEdit, word, data) {
             <h3 data-word="${newWord}">${newWord}</h3>
             <p><strong>Translation:</strong> ${updatedData.translation}</p>
             <p><strong>Example:</strong> ${updatedData.example}</p>
+            <p><strong>Example Translation:</strong> ${updatedData.exampleTranslation}</p>
             <p><strong>Category:</strong> ${updatedData.category}</p>
             ${updatedData.imageUrl ? `<img src="${updatedData.imageUrl}" alt="${newWord}">` : ''}
             ${updatedData.audioUrl ? `<audio controls src="data:audio/webm;base64,${updatedData.audioUrl}"></audio>` : ''}
@@ -194,7 +235,11 @@ async function handleConfirm(isEdit, word, data) {
             card.classList.remove('highlight-success');
         }, 3000);
     } else {
-        listWords(currentCategory, currentPage);
+        // Add the new word to the list immediately
+        const wordList = document.querySelector('.word-list ul');
+        const card = createCard(newWord, updatedData);
+        wordList.appendChild(card);
+        document.querySelector('.word-list').classList.add('show');
     }
 }
 
@@ -219,13 +264,21 @@ window.showDeleteModal = function(word, triggerElement) {
 // Function to show the edit modal
 window.showEditModal = function(word, triggerElement) {
     const data = dictionaryStorage.getWord(word);
+    const categories = new Set(dictionaryStorage.getWords().map(word => dictionaryStorage.getWord(word).category));
+    const categoryOptions = Array.from(categories).map(category => `<option value="${category}">${category}</option>`).join('');
     const content = `
         <label>Word: <input type="text" id="edit-word" value="${word}"></label>
         <label>Translation: <input type="text" id="edit-translation" value="${data.translation}"></label>
         <label>Example: <input type="text" id="edit-example" value="${data.example}"></label>
-        <label>Category: <input type="text" id="edit-category" value="${data.category}"></label>
-        <label>Image URL: <input type="text" id="edit-imageUrl" value="${data.imageUrl || ''}"></label>
-        <input type="file" id="audio-file-input-edit-modal" accept="audio/*">
+        <label>Example Translation: <input type="text" id="edit-example-translation" value="${data.exampleTranslation || ''}"></label>
+        <label>Category: 
+            <input list="category-list" id="edit-category" value="${data.category}">
+            <datalist id="category-list">
+                ${categoryOptions}
+            </datalist>
+        </label>
+        <label>Image URL: <input type="text" id="edit-imageUrl" value="${data.imageUrl || ''}" placeholder="Введите ссылку на изображение (URL)"></label>
+        <label>Audio file: <input type="file" id="audio-file-input-edit-modal" accept="audio/*"></label>
         <button id="upload-button-edit-modal" disabled>Upload Audio</button>
     `;
 
@@ -234,13 +287,21 @@ window.showEditModal = function(word, triggerElement) {
 
 // Function to show the add modal
 window.showAddModal = function(triggerElement) {
+    const categories = new Set(dictionaryStorage.getWords().map(word => dictionaryStorage.getWord(word).category));
+    const categoryOptions = Array.from(categories).map(category => `<option value="${category}">${category}</option>`).join('');
     const content = `
         <label>Word: <input type="text" id="edit-word" value=""></label>
         <label>Translation: <input type="text" id="edit-translation" value=""></label>
         <label>Example: <input type="text" id="edit-example" value=""></label>
-        <label>Category: <input type="text" id="edit-category" value=""></label>
-        <label>Image URL: <input type="text" id="edit-imageUrl" value=""></label>
-        <input type="file" id="audio-file-input-add-modal" accept="audio/*">
+        <label>Example Translation: <input type="text" id="edit-example-translation" value=""></label>
+        <label>Category: 
+            <input list="category-list" id="edit-category">
+            <datalist id="category-list">
+                ${categoryOptions}
+            </datalist>
+        </label>
+        <label>Image URL: <input type="text" id="edit-imageUrl" value="" placeholder="Введите ссылку на изображение (URL)"></label>
+        <label>Audio file: <input type="file" id="audio-file-input-add-modal" accept="audio/*"></label>
         <button id="upload-button-add-modal" disabled>Upload Audio</button>
     `;
 

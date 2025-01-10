@@ -7,10 +7,33 @@
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <script src="loadHeader.js"></script>
-    <div class="container">
-        <h2>Games</h2>
-        <!-- Добавьте контент для игр здесь -->
+  <div id="header-placeholder"></div>
+  <script src="loadHeader.js"></script>
+    <div class="container games-container">
+        <h2>Select a game</h2>
+        <!-- Game selection menu -->
+        <div class="local-menu game-area">
+            <ul class="horizontal-list">
+                <li><a href="#" id="game1" class="game-link">Memory-cards</a></li>
+                <li><a href="#" id="game2" class="game-link">Create sentences</a></li>
+                <li><a href="#" id="game3" class="game-link">Game 3</a></li>
+            </ul>
+        </div>
+        <!-- Game content area -->
+        <div id="game-content" class="game-content">
+            <p>You have to Select a game to start playing.</p>
+        </div>
     </div>
+    <script>
+        const gameLinks = document.querySelectorAll('.game-link');
+        gameLinks.forEach(link => {
+            link.onclick = function() {
+                gameLinks.forEach(link => link.classList.remove('active'));
+                this.classList.add('active');
+                const gameId = this.id;
+                document.getElementById('game-content').innerHTML = `<p>${this.textContent} content goes here.</p>`;
+            };
+        });
+    </script>
 </body>
 </html>

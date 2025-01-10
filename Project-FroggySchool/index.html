@@ -7,19 +7,62 @@
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+    <!-- Load the header -->
+    <div id="header-placeholder"></div>
     <script src="loadHeader.js"></script>
     <div class="container">
         <a id="top"></a> <!-- Якорь для прокрутки вверх -->
         <h2>Welcome to Personal Dictionary</h2>
-        <p>This is your personal dictionary where you can add, edit, and manage your words. You can also play games to learn new words.</p>
-        <p>Please <a href="login.html">login</a> or <a href="register.html">register</a> to get started.</p>
-        <p>Or explore the following sections:</p>
-        <ul>
-            <li><a href="dictionary.html">Dictionary</a></li>
-            <li><a href="games.html">Games</a></li>
-        </ul>
+        <div id="login-container">
+            <form id="login-form">
+                <label>Username: <input type="text" id="login-username" required></label>
+                <button type="submit">Login</button>
+            </form>
+        </div>
+        <div id="welcome-container" style="display: none;">
+            <p>Welcome back, <span id="user-username"></span>!</p>
+            <button id="change-username">Change Username</button>
+            <!-- <p>Explore the following sections:</p> -->
+            <!-- <ul>
+                <li><a href="dictionary.html">Dictionary</a></li>
+                <li><a href="games.html">Games</a></li>
+            </ul> -->
+        </div>
     </div>
     <a href="#top" id="scroll-to-top" class="scroll-to-top">↑</a> <!-- Стрелка-ссылка для прокрутки вверх -->
     <script src="scrollToTop.js"></script> <!-- Подключаем скрипт для логики скролла -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const username = localStorage.getItem('username');
+            if (username) {
+                document.getElementById('user-username').textContent = username;
+                document.getElementById('login-container').style.display = 'none';
+                document.getElementById('welcome-container').style.display = 'block';
+            } else {
+                document.getElementById('login-container').style.display = 'block';
+                document.getElementById('welcome-container').style.display = 'none';
+            }
+
+            const loginForm = document.getElementById('login-form');
+            loginForm.addEventListener('submit', (event) => {
+                event.preventDefault();
+                const username = document.getElementById('login-username').value;
+
+                if (username) {
+                    localStorage.setItem('username', username);
+                    alert('Login successful');
+                    window.location.href = 'index.html'; // Перенаправляем на главную страницу после успешного входа
+                } else {
+                    alert('Please enter a username');
+                }
+            });
+
+            const changeUsernameButton = document.getElementById('change-username');
+            changeUsernameButton.addEventListener('click', () => {
+                localStorage.removeItem('username');
+                window.location.href = 'index.html'; // Перезагружаем страницу для ввода нового имени
+            });
+        });
+    </script>
 </body>
 </html>

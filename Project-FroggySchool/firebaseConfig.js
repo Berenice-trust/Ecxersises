@@ -1,3 +1,5 @@
+
+
 // Firebase configuration object containing API keys and other identifiers
 const firebaseConfig = {
     apiKey: "AIzaSyA_eHIhq95NHtUuJzavYdTyjeHIyn3j8xE",

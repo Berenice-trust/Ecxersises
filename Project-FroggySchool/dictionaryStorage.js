@@ -9,8 +9,8 @@ const db = getDatabase(app);
 
 // Class to handle dictionary storage operations with Firebase
 export class DictionaryStorage {
-    constructor(storageKey) {
-        this.storageKey = storageKey; // Key to identify the storage in Firebase
+    constructor() {
+        this.username = localStorage.getItem('username');
         this.words = {}; // Object to store words and their data
         this.db = db; // Firebase database instance
         this.initializeStorage(); // Initialize storage with data from Firebase
@@ -18,8 +18,12 @@ export class DictionaryStorage {
 
     // Save the current state of words to Firebase
     async save() {
+        if (!this.username) {
+            console.error('User is not authenticated');
+            return;
+        }
         try {
-            await set(ref(this.db, this.storageKey), this.words);
+            await set(ref(this.db, `dictionaryStorage_${this.username}`), this.words);
         } catch (error) {
             console.error(`Error saving data to Firebase: ${error}`);
         }
@@ -27,12 +31,16 @@ export class DictionaryStorage {
 
     // Initialize storage by reading data from Firebase
     async initializeStorage() {
+        if (!this.username) {
+            console.error('User is not authenticated');
+            return;
+        }
         try {
-            const snapshot = await get(child(ref(this.db), this.storageKey));
+            const snapshot = await get(child(ref(this.db), `dictionaryStorage_${this.username}`));
             if (snapshot.exists()) {
                 this.words = snapshot.val(); // Load words from Firebase
             } else {
-                console.log(`No data available for ${this.storageKey}`);
+                console.log(`No data available for dictionaryStorage_${this.username}`);
             }
         } catch (error) {
             console.error(`Error reading data from Firebase: ${error}`);
@@ -82,12 +90,16 @@ export class DictionaryStorage {
 
     // Save audio data for a specific word to Firebase
     async saveAudio(word, file) {
+        if (!this.username) {
+            console.error('User is not authenticated');
+            return null;
+        }
         try {
             if (!(file instanceof Blob)) {
                 throw new TypeError("Argument must be an instance of Blob");
             }
             const base64String = await fileToBase64(file);
-            const audioRef = ref(this.db, `${this.storageKey}/${word}/audioUrl`);
+            const audioRef = ref(this.db, `dictionaryStorage_${this.username}/${word}/audioUrl`);
             await set(audioRef, base64String);
             console.log('Audio file saved to Firebase Database');
             return base64String;
@@ -99,8 +111,12 @@ export class DictionaryStorage {
 
     // Load audio data for a specific word from Firebase
     async loadAudio(word) {
+        if (!this.username) {
+            console.error('User is not authenticated');
+            return null;
+        }
         try {
-            const audioRef = ref(this.db, `${this.storageKey}/${word}/audioUrl`);
+            const audioRef = ref(this.db, `dictionaryStorage_${this.username}/${word}/audioUrl`);
             const snapshot = await get(audioRef);
             if (snapshot.exists()) {
                 return snapshot.val();
@@ -116,5 +132,5 @@ export class DictionaryStorage {
 }
 
 // Экспортируем экземпляр для использования в других файлах
-export const dictionaryStorage = new DictionaryStorage('dictionaryStorage');
+export const dictionaryStorage = new DictionaryStorage();
 
