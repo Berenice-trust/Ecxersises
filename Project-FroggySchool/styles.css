@@ -274,22 +274,21 @@ li {
     right: 20px;
     background-color: var(--primary-color);
     color: var(--background-color);
-    /* padding: 6px; */
     border-radius: 50%;
     text-align: center;
     text-decoration: none;
-    font-size: 24px; /* Уменьшаем размер шрифта */
+    font-size: 24px;
     z-index: 1000;
     opacity: 0;
-    transition: opacity 3s ease; /* Изменяем время перехода на 3 секунды */
-    width: 40px; /* Уменьшаем ширину */
-    height: 40px; /* Уменьшаем высоту */
-    line-height: 35px; /* Центрируем текст по вертикали */
-    font-weight:bold; /* Делаем стрелку толще */
+    transition: opacity 0.3s ease;
+    width: 40px;
+    height: 40px;
+    line-height: 35px;
+    font-weight: bold;
 }
 
 .scroll-to-top.show {
-    opacity: 1; /* Устанавливаем видимость */
+    opacity: 1;
 }
 
 .scroll-to-top:hover {
@@ -350,7 +349,7 @@ li {
 
 .game-link.active {
   background-color: var(--primary-color-hover);
-  color: white;
+  color: var(--background-color);
   border-radius: 5px;
   padding: 10px;
 }
@@ -358,3 +357,83 @@ li {
 /* .games-container {
   background-color: #e0f7fa;
 } */
+.game-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+  margin-top: 20px;
+}
+.game-card {
+  background-color: #fff;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+.game-card:hover {
+  transform: translateY(-5px);
+}
+.game-card h3 {
+  margin-top: 0;
+}
+
+.word-list-container {
+  transition-duration: 1s;
+  transition-timing-function: linear;
+  overflow: hidden;
+  height: 0;
+}
+
+.game-container {
+  margin-top: 20px;
+  padding: 20px;
+  background-color: var(--light-gray-color);
+  border-radius: var(--border-radius);
+  box-shadow: var(--box-shadow);
+}
+
+.sentence-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.draggable-word {
+  padding: 10px;
+  background-color: var(--card-background-color);
+  border: 1px solid var(--primary-color);
+  border-radius: var(--border-radius);
+  cursor: pointer;
+  user-select: none;
+}
+
+.draggable-word:hover {
+  background-color: var(--primary-color-hover);
+  color: var(--background-color);
+}
+
+.result {
+  margin-top: 20px;
+  font-size: var(--font-size-large);
+}
+
+.result.correct {
+  color: green;
+}
+
+.result.incorrect {
+  color: red;
+}
+
+.game-buttons {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 20px;
+}
+
+.next-sentence {
+  margin-left: 10px;
+}

@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Test Page</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div id="header-placeholder"></div>
+  <script src="loadHeader.js"></script>
+  <div class="container">
+    <h2>All Words</h2>
+    <select id="category-filter" title="Filter by category">
+      <option value="">All Categories</option>
+      <!-- Опции категорий будут добавлены динамически -->
+    </select>
+    <div id="word-list" class="word-list">
+      <p>Loading words...</p>
+    </div>
+  </div>
+  <script type="module">
+    import { DictionaryStorage } from './dictionaryStorage.js';
+
+    const dictionaryStorage = new DictionaryStorage('dictionaryStorage');
+
+    async function displayAllWords(category = '') {
+      await dictionaryStorage.initializeStorage();
+      const words = category ? dictionaryStorage.getWordsByCategory(category) : dictionaryStorage.getWords();
+      const wordList = document.getElementById('word-list');
+      if (words.length > 0) {
+        wordList.innerHTML = `<ul>${words.map(word => `<li>${word}</li>`).join('')}</ul>`;
+      } else {
+        wordList.innerHTML = '<p>No words found in the database.</p>';
+      }
+    }
+
+    async function updateCategoryFilter() {
+      await dictionaryStorage.initializeStorage();
+      const categories = new Set(dictionaryStorage.getWords().map(word => dictionaryStorage.getWord(word).category));
+      const categoryFilter = document.getElementById('category-filter');
+      categoryFilter.innerHTML = '<option value="">All Categories</option>';
+      categories.forEach(category => {
+        const option = document.createElement('option');
+        option.value = category;
+        option.textContent = category;
+        categoryFilter.appendChild(option);
+      });
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      updateCategoryFilter();
+      displayAllWords();
+
+      document.getElementById('category-filter').onchange = function() {
+        const category = this.value;
+        displayAllWords(category);
+      };
+    });
+  </script>
+</body>
+</html>
