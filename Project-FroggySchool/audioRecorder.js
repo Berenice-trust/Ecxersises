@@ -77,7 +77,7 @@ export class AudioRecorder {
 
     async startRecording() {
         if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-            alert('Ваш браузер не поддерживает запись аудио.');
+            alert('Your brouser dont supported MediaRecorder.');
             return;
         }
 
@@ -104,7 +104,7 @@ export class AudioRecorder {
         return new Promise((resolve, reject) => {
             mediaRecorder.onstop = async () => {
                 const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
-                mediaStream.getTracks().forEach(track => track.stop()); // Останавливаем все треки медиа потока
+                mediaStream.getTracks().forEach(track => track.stop()); // stop all media tracks
                 resolve(audioBlob);
             };
 

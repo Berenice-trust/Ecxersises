@@ -1,4 +1,4 @@
-/* CSS Variables */
+
 :root {
   --primary-color: #007bff;
   --primary-color-hover: #0056b3;
@@ -569,8 +569,8 @@ li {
 /* Styles for dictionary cards */
 .dictionary-card {
   position: relative;
-  width: 80%; /* Make the card narrower */
-  max-width: 300px; /* Set a maximum width */
+  width: 80%; 
+  max-width: 300px; 
   background: var(--card-background-color);
   border: 1px solid #ccc;
   border-radius: var(--border-radius);
