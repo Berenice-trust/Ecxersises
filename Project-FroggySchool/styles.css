@@ -40,6 +40,10 @@ body {
   background: var(--card-background-color);
   border-radius: var(--border-radius);
   box-shadow: var(--box-shadow);
+  display: flex;
+  justify-content: center; /* Center the game-container horizontally */
+  align-items: center; /* Center the game-container vertically */
+  flex-direction: column; /* Ensure vertical alignment */
 }
 
 h1 {
@@ -54,7 +58,7 @@ button {
   padding: var(--button-padding);
   text-align: center;
   text-decoration: none;
-  display: inline-block;
+  display: inline-block; /* Ensure the button remains visible */
   font-size: 1em;
   margin: 10px 5px;
   cursor: pointer;
@@ -65,6 +69,11 @@ button {
 button:hover {
   background-color: var(--primary-color-hover);
   transform: scale(var(--button-hover-scale));
+}
+
+button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
 }
 
 .output {
@@ -107,13 +116,18 @@ li {
 }
 
 .card {
-  background: var(--card-background-color);
-  border-radius: var(--border-radius);
-  box-shadow: var(--box-shadow);
-  padding: var(--padding);
-  margin: 15px 0; /* Add top and bottom margin */
-  position: relative;
-  transition: all 3s ease;
+  position: absolute;
+  width: 80%; /* Make the card narrower */
+  height: 100%;
+  background: white;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  transition: transform 0.5s ease, opacity 0.5s ease; /* Add opacity transition */
 }
 
 .card h3 {
@@ -338,6 +352,19 @@ li {
   margin-top: var(--margin); 
 }
 
+.game-container {
+  margin-top: 20px;
+  padding: 20px;
+  background-color: var(--light-gray-color);
+  border-radius: var(--border-radius);
+  box-shadow: var(--box-shadow);
+  height: calc(100% + 20px); /* Adjust the height */
+  transition: height 0.5s ease;
+  display: flex;
+  flex-direction: column;
+  justify-content: center; /* Center the content vertically */
+  align-items: center; /* Center the content horizontally */
+}
 
 .game-content {
   background-color: var(--card-background-color);
@@ -386,12 +413,32 @@ li {
   height: 0;
 }
 
-.game-container {
-  margin-top: 20px;
+.card-container {
+  position: relative;
+  height: 0; /* Initial height */
+  width: 500px; /* Adjust the width */
+  margin: 0 auto; /* Center the container */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.card-content {
   padding: 20px;
-  background-color: var(--light-gray-color);
-  border-radius: var(--border-radius);
-  box-shadow: var(--box-shadow);
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.current-card {
+  z-index: 2;
+}
+
+.next-card {
+  z-index: 1;
+  transform: scale(0.95);
 }
 
 .sentence-container {
@@ -432,8 +479,90 @@ li {
   display: flex;
   justify-content: space-between;
   margin-top: 20px;
+  width: 100%; /* Ensure buttons are centered */
+  max-width: 500px; /* Match the card container width */
 }
 
-.next-sentence {
-  margin-left: 10px;
+.btn-know {
+  margin-right: auto; /* Move the button to the left edge */
 }
+
+.btn-dont-know {
+  margin-left: auto; /* Move the button to the right edge */
+}
+
+.word-container {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.word-item {
+  padding: 10px;
+  border: 2px solid #ccc;
+  border-radius: 4px;
+  cursor: move;
+  background-color: #f0f0f0;
+  font-size: 18px;
+}
+
+.word-item.dragging {
+  opacity: 0.5;
+}
+
+.word-item.correct {
+  border-color: green;
+}
+
+.word-item.incorrect {
+  border-color: red;
+}
+
+.btn-check {
+  padding: 10px 20px;
+  font-size: 20px;
+  cursor: pointer;
+  border-radius: 5px;
+}
+
+.messages {
+  margin-top: 20px;
+  display: flex;
+  flex-direction: column; 
+}
+
+.message {
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  margin-bottom: 5px;
+}
+
+.message.correct {
+  border-color: green;
+  color: green;
+}
+ 
+.message.incorrect {
+  border-color: red;
+  color: red;
+}
+
+.btn-know, .btn-dont-know {
+  padding: 10px 20px;
+  font-size: 20px;
+  cursor: pointer;
+  border-radius: 5px;
+  margin: 10px;
+} 
+
+.btn-know {
+  background-color: green;
+  color: white;
+}
+
+.btn-dont-know {
+  background-color: red;
+  color: white;
+}
+ 

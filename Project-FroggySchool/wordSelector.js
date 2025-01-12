@@ -16,6 +16,7 @@ export async function displayAllWords(category = '') {
     } else {
         wordList.innerHTML = '<p>No words found in the database.</p>';
     }
+    document.getElementById('start-game').style.display = 'block'; // Show the start game button
 }
 
 export async function updateCategoryFilter() {

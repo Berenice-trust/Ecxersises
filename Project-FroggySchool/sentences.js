@@ -1,8 +1,9 @@
 import { DictionaryStorage } from './dictionaryStorage.js';
 
 const dictionaryStorage = new DictionaryStorage('dictionaryStorage');
-let completedSentences = new Set();
-let currentWords = [];
+let sentences = [];
+let currentIndex = 0;
+let correctOrder = [];
 
 document.addEventListener('DOMContentLoaded', () => {
     const startGameButton = document.getElementById('start-game');
@@ -11,77 +12,78 @@ document.addEventListener('DOMContentLoaded', () => {
 
 async function startGame() {
     const startGameButton = document.getElementById('start-game');
-    startGameButton.style.display = 'none';
+    startGameButton.textContent = 'Restart Game';
 
     const gameContainer = document.getElementById('game-container');
+    gameContainer.innerHTML = ''; // Clear the game container
     gameContainer.style.transition = 'height 2s ease, opacity 2s ease';
     gameContainer.style.height = 'auto';
     gameContainer.style.opacity = '1';
 
-    await loadWords();
-    loadNextSentence();
+    await loadSentences();
+    currentIndex = 0;
+    showNextSentence();
 }
 
-async function loadWords() {
+async function loadSentences() {
     const category = document.getElementById('category-filter').value;
-    currentWords = category ? dictionaryStorage.getWordsByCategory(category) : dictionaryStorage.getWords();
+    const words = category ? dictionaryStorage.getWordsByCategory(category) : dictionaryStorage.getWords();
+    sentences = words.map(word => {
+        const data = dictionaryStorage.getWord(word);
+        return {
+            example: data.example,
+            exampleTranslation: data.exampleTranslation || ''
+        };
+    }).filter(sentence => sentence.example);
 }
 
-async function loadNextSentence() {
+function showNextSentence() {
     const gameContainer = document.getElementById('game-container');
 
-    if (currentWords.length > 0) {
-        let word;
-        let data;
-        let example;
-        let exampleTranslation;
-        do {
-            word = currentWords[Math.floor(Math.random() * currentWords.length)];
-            data = dictionaryStorage.getWord(word);
-            example = data.example;
-            exampleTranslation = data.exampleTranslation;
-        } while (completedSentences.has(example) && completedSentences.size < currentWords.length);
-
-        const shuffledWords = shuffleArray(example.split(' '));
-        const sentence = createSentence(shuffledWords);
-
-        gameContainer.innerHTML = `
-            <h3>Assemble the Sentence</h3>
-            <p>Translation: ${exampleTranslation}</p>
-            <div id="sentence-container" class="sentence-container">${sentence}</div>
-            <div class="game-buttons">
-                <button id="check-sentence">Check Sentence</button>
-                <button id="next-sentence" class="next-sentence">Next Sentence</button>
-            </div>
-            <div id="result" class="result"></div>
-        `;
-
-        const checkSentenceButton = document.getElementById('check-sentence');
-        checkSentenceButton.addEventListener('click', () => checkSentence(example));
-
-        const nextSentenceButton = document.getElementById('next-sentence');
-        nextSentenceButton.addEventListener('click', loadNextSentence);
-
-        addDragAndDropHandlers();
-    } else {
-        gameContainer.innerHTML = '<p>No words available for the selected category.</p>';
+    if (sentences.length === 0) {
+        gameContainer.innerHTML = '<p>No valid sentences available for the selected category. Please choose another category.</p>';
+        return;
     }
-}
 
-function shuffleArray(array) {
-    for (let i = array.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [array[i], array[j]] = [array[j], array[i]];
+    if (currentIndex >= sentences.length) {
+        gameContainer.innerHTML = '<p>Поздравляю, вы все прошли!</p><button id="reset-game">Reset</button>';
+        document.getElementById('reset-game').addEventListener('click', startGame);
+        return;
     }
-    return array;
+
+    const sentenceData = sentences[currentIndex];
+    const words = sentenceData.example.split(' ').map((text, index) => ({ order: (index + 1).toString(), text }));
+    correctOrder = words.map(word => word.order);
+
+    const shuffledWords = words.sort(() => Math.random() - 0.5);
+    const sentence = createSentence(shuffledWords);
+
+    gameContainer.innerHTML = `
+        <h3>Please, drag the words and put them in the correct order</h3>
+        ${sentenceData.exampleTranslation ? `<p>Translation: ${sentenceData.exampleTranslation}</p>` : ''}
+        <div id="word-container" class="word-container">${sentence}</div>
+        <div class="game-buttons">
+            <button id="check-sentence" class="btn-check">Check Sentence</button>
+            <button id="next-sentence" class="next-sentence" disabled>Next Sentence</button>
+        </div>
+        <div id="messages" class="messages"></div>
+    `;
+
+    addDragAndDropHandlers();
+    document.getElementById('check-sentence').addEventListener('click', checkOrder);
+    document.getElementById('next-sentence').addEventListener('click', () => {
+        currentIndex++;
+        showNextSentence();
+    });
 }
 
 function createSentence(words) {
-    return words.map(word => `<span class="draggable-word" draggable="true">${word}</span>`).join(' ');
+    return words.map(word => `<div class="word-item" draggable="true" data-order="${word.order}">${word.text}</div>`).join('');
 }
 
 function addDragAndDropHandlers() {
-    const wordItems = Array.from(document.querySelectorAll('.draggable-word'));
+    const wordContainer = document.getElementById('word-container');
+    const wordItems = Array.from(document.querySelectorAll('.word-item'));
     let draggedItem = null;
 
     wordItems.forEach(item => {
@@ -96,20 +98,19 @@ function addDragAndDropHandlers() {
         });
     });
 
-    const sentenceContainer = document.getElementById('sentence-container');
-    sentenceContainer.addEventListener('dragover', function(event) {
+    wordContainer.addEventListener('dragover', function(event) {
         event.preventDefault();
-        const afterElement = getDragAfterElement(sentenceContainer, event.clientX);
+        const afterElement = getDragAfterElement(wordContainer, event.clientX);
         if (afterElement == null) {
-            sentenceContainer.appendChild(draggedItem);
+            wordContainer.appendChild(draggedItem);
         } else {
-            sentenceContainer.insertBefore(draggedItem, afterElement);
+            wordContainer.insertBefore(draggedItem, afterElement);
         }
     });
 }
 
 function getDragAfterElement(container, x) {
-    const draggableElements = [...container.querySelectorAll('.draggable-word:not(.dragging)')];
+    const draggableElements = [...container.querySelectorAll('.word-item:not(.dragging)')];
 
     return draggableElements.reduce((closest, child) => {
         const box = child.getBoundingClientRect();
@@ -122,19 +123,37 @@ function getDragAfterElement(container, x) {
     }, { offset: Number.NEGATIVE_INFINITY }).element;
 }
 
-function checkSentence(correctSentence) {
-    const sentenceContainer = document.getElementById('sentence-container');
-    const words = Array.from(sentenceContainer.children).map(wordElement => wordElement.textContent).join(' ');
-    const resultContainer = document.getElementById('result');
+function checkOrder() {
+    const wordContainer = document.getElementById('word-container');
+    const items = wordContainer.querySelectorAll('.word-item');
+    let isCorrect = true;
 
-    if (words === correctSentence) {
-        resultContainer.textContent = 'Correct!';
-        resultContainer.classList.add('correct');
-        resultContainer.classList.remove('incorrect');
-        completedSentences.add(correctSentence);
-    } else {
-        resultContainer.textContent = 'Incorrect. Try again.';
-        resultContainer.classList.add('incorrect');
-        resultContainer.classList.remove('correct');
+    items.forEach((item, index) => {
+        if (item.getAttribute('data-order') === correctOrder[index]) {
+            item.classList.add('correct');
+            item.classList.remove('incorrect');
+        } else {
+            item.classList.add('incorrect');
+            item.classList.remove('correct');
+            isCorrect = false;
+        }
+    });
+
+    if (isCorrect) {
+        document.getElementById('next-sentence').disabled = false;
+    }
+
+    addMessage(isCorrect ? 'Correct order!' : 'Incorrect order. Try again.');
+}
+
+function addMessage(text) {
+    const messagesDiv = document.getElementById('messages');
+    const messageDiv = document.createElement('div');
+    messageDiv.textContent = text;
+    messageDiv.classList.add('message', text.includes('Correct') ? 'correct' : 'incorrect');
+    messagesDiv.prepend(messageDiv);
+
+    if (messagesDiv.children.length > 6) {
+        messagesDiv.lastElementChild.remove();
     }
 }
