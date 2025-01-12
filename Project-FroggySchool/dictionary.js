@@ -62,7 +62,7 @@ export function listWords(category = '', page = 1) {
     } else {
         words = dictionaryStorage.getWords();
     }
-    const wordList = document.querySelector('.word-list ul');
+    const wordList = document.querySelector('.dictionary-list');
     if (page === 1) {
         wordList.innerHTML = '';
     }
@@ -74,7 +74,9 @@ export function listWords(category = '', page = 1) {
     paginatedWords.forEach(word => {
         const data = dictionaryStorage.getWord(word);
         const card = createCard(word, data);
-        wordList.appendChild(card);
+        const listItem = document.createElement('li');
+        listItem.appendChild(card);
+        wordList.appendChild(listItem);
     });
 
     document.querySelector('.word-list').classList.add('show');
@@ -86,7 +88,7 @@ export function listWords(category = '', page = 1) {
 // Function to create a card element
 function createCard(word, data) {
     const card = document.createElement('div');
-    card.className = 'card';
+    card.className = 'dictionary-card';
     card.innerHTML = `
         <h3 data-word="${word}">${word}</h3>
         <p><strong>Translation:</strong> ${data.translation}</p>
@@ -164,6 +166,9 @@ function isValidUrl(url) {
 
 // Function to check if the URL points to a valid image
 async function validateImageUrl(url) {
+    if (!url) {
+        return ''; // Return empty string if URL is empty
+    }
     if (url.startsWith('data:image/')) {
         return url; // Base64 encoded image data is considered valid
     }
@@ -223,30 +228,34 @@ async function handleConfirm(isEdit, word, data) {
 
     // Update the card content without reloading the entire list
     if (isEdit) {
-        const card = document.querySelector(`.card h3[data-word="${word}"]`).parentElement;
-        card.innerHTML = `
-            <h3 data-word="${newWord}">${newWord}</h3>
-            <p><strong>Translation:</strong> ${updatedData.translation}</p>
-            <p><strong>Example:</strong> ${updatedData.example}</p>
-            <p><strong>Example Translation:</strong> ${updatedData.exampleTranslation}</p>
-            <p><strong>Category:</strong> ${updatedData.category}</p>
-            ${updatedData.imageUrl ? `<img src="${updatedData.imageUrl}" alt="${newWord}">` : ''}
-            ${updatedData.audioUrl ? `<audio controls src="data:audio/webm;base64,${updatedData.audioUrl}"></audio>` : ''}
-            <button onclick="showEditModal('${newWord}', this)">Edit</button>
-            <button onclick="showDeleteModal('${newWord}', this)">Delete</button>
-            <div class="message">Changes saved</div>
-        `;
-        card.classList.add('highlight-success');
-        setTimeout(() => {
-            const message = card.querySelector('.message');
-            message.textContent = '';
-            card.classList.remove('highlight-success');
-        }, 3000);
+        const card = document.querySelector(`.dictionary-card h3[data-word="${word}"]`)?.parentElement;
+        if (card) {
+            card.innerHTML = `
+                <h3 data-word="${newWord}">${newWord}</h3>
+                <p><strong>Translation:</strong> ${updatedData.translation}</p>
+                <p><strong>Example:</strong> ${updatedData.example}</p>
+                <p><strong>Example Translation:</strong> ${updatedData.exampleTranslation}</p>
+                <p><strong>Category:</strong> ${updatedData.category}</p>
+                ${updatedData.imageUrl ? `<img src="${updatedData.imageUrl}" alt="${newWord}">` : ''}
+                ${updatedData.audioUrl ? `<audio controls src="data:audio/webm;base64,${updatedData.audioUrl}"></audio>` : ''}
+                <button onclick="showEditModal('${newWord}', this)">Edit</button>
+                <button onclick="showDeleteModal('${newWord}', this)">Delete</button>
+                <div class="message">Changes saved</div>
+            `;
+            card.classList.add('highlight-success');
+            setTimeout(() => {
+                const message = card.querySelector('.message');
+                message.textContent = '';
+                card.classList.remove('highlight-success');
+            }, 3000);
+        }
     } else {
         // Add the new word to the list immediately
-        const wordList = document.querySelector('.word-list ul');
+        const wordList = document.querySelector('.dictionary-list');
         const card = createCard(newWord, updatedData);
-        wordList.appendChild(card);
+        const listItem = document.createElement('li');
+        listItem.appendChild(card);
+        wordList.appendChild(listItem);
         document.querySelector('.word-list').classList.add('show');
     }
 }

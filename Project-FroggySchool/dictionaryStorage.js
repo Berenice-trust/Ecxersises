@@ -60,6 +60,9 @@ export class DictionaryStorage {
 
     // Get a list of all words
     getWords() {
+        // Hide loading message after words are loaded
+        // document.getElementById('loading-message').style.display = 'none'; // Commented out to avoid error
+
         return Object.keys(this.words);
     }
 

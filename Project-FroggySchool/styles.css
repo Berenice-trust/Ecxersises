@@ -565,4 +565,68 @@ li {
   background-color: red;
   color: white;
 }
- 
+
+/* Styles for dictionary cards */
+.dictionary-card {
+  position: relative;
+  width: 80%; /* Make the card narrower */
+  max-width: 300px; /* Set a maximum width */
+  background: var(--card-background-color);
+  border: 1px solid #ccc;
+  border-radius: var(--border-radius);
+  box-shadow: var(--box-shadow);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start; /* Align items to the start for list view */
+  transition: transform 0.5s ease, opacity 0.5s ease;
+  margin-bottom: var(--margin);
+  padding: var(--padding);
+}
+
+.dictionary-card h3 {
+  margin: 0 0 10px;
+  display: inline-block;
+}
+
+.dictionary-card p {
+  margin: 5px 0;
+}
+
+.dictionary-card img {
+  max-width: var(--max-width-image);
+  display: block;
+  margin: 10px 0;
+}
+
+.dictionary-card audio {
+  display: block;
+  margin: 10px 0;
+}
+
+.dictionary-card .message {
+  color: var(--message-color);
+  font-size: var(--font-size-small);
+  position: absolute;
+  top: 0;
+  right: 20px;
+  margin-top: 10px;
+}
+
+/* Styles for dictionary list */
+.dictionary-list {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center; /* Center the cards horizontally */
+}
+
+.dictionary-list li {
+  margin-bottom: var(--margin);
+  list-style-type: none; /* Remove default list style */
+  display: flex;
+  justify-content: center; /* Center the card within the list item */
+  width: 100%; /* Ensure the list item takes full width */
+}

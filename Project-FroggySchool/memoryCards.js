@@ -8,13 +8,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const startGameButton = document.getElementById('start-game');
     startGameButton.addEventListener('click', startGame);
 
-
-
-
-    
-
-
     document.addEventListener('keydown', handleKeyPress);
+
+    // Show loading message initially
+    const loadingMessage = document.getElementById('loading-message');
+    loadingMessage.style.display = 'block';
 });
 
 async function startGame() {
@@ -38,6 +36,7 @@ async function startGame() {
     gameContainerText.textContent = 'Do you know the translation of this word?';
 
     await loadWords();
+    
     currentIndex = 0;
     showNextCard();
 }
@@ -52,10 +51,18 @@ async function loadWords() {
             translation: data.translation || '',
             example: data.example || '',
             exampleTranslation: data.exampleTranslation || '',
-            image: data.image || '',
+            imageUrl: data.imageUrl || '',
             known: false
         };
     }).filter(word => word.word);
+
+    // Show start game button if words are loaded
+    if (words.length > 0) {
+        document.getElementById('start-game').style.display = 'block';
+        document.getElementById('loading-message').innerHTML = '';
+    } else {
+        document.getElementById('game-container-text').textContent = 'No words available for the selected category.';
+    }
 }
 
 function showNextCard() {
@@ -77,10 +84,12 @@ function showNextCard() {
 
     cardContainer.innerHTML = `
         <div class="card current-card">
+            ${wordData.imageUrl ? `<img src="${wordData.imageUrl}" alt="${wordData.word}" class="card-image">` : ''}
             <p>Translation: ${wordData.translation}</p>
             ${wordData.exampleTranslation ? `<p>Example Translation: ${wordData.exampleTranslation}</p>` : ''}
         </div>
         <div class="card next-card">
+            ${nextWordData.imageUrl ? `<img src="${nextWordData.imageUrl}" alt="${nextWordData.word}" class="card-image">` : ''}
             <p>Translation: ${nextWordData.translation}</p>
             ${nextWordData.exampleTranslation ? `<p>Example Translation: ${nextWordData.exampleTranslation}</p>` : ''}
         </div>
@@ -89,11 +98,11 @@ function showNextCard() {
     const currentCard = cardContainer.querySelector('.current-card');
     currentCard.addEventListener('click', () => {
         currentCard.innerHTML = `
+            ${wordData.imageUrl ? `<img src="${wordData.imageUrl}" alt="${wordData.word}" class="card-image">` : ''}
             <p>Word: ${wordData.word}</p>
             <p>Translation: ${wordData.translation}</p>
             ${wordData.example ? `<p>Example: ${wordData.example}</p>` : ''}
             ${wordData.exampleTranslation ? `<p>Example Translation: ${wordData.exampleTranslation}</p>` : ''}
-            ${wordData.image ? `<img src="${wordData.image}" alt="${wordData.word}">` : ''}
         `;
     });
 
