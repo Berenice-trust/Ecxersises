@@ -42,6 +42,10 @@ export class DictionaryStorage {
             } else {
                 console.log(`No data available for dictionaryStorage_${this.username}`);
             }
+            const loadingMessage = document.getElementById('loading-message');
+            if (loadingMessage) {
+                loadingMessage.style.display = 'none'; // Hide loading message
+            }
         } catch (error) {
             console.error(`Error reading data from Firebase: ${error}`);
         }

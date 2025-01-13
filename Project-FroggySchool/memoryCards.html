@@ -24,8 +24,14 @@
   </div>
   <a href="#top" id="scroll-to-top" class="scroll-to-top">↑</a>
   <div class="container">
-     <p id="loading-message">Loading...</p> <!-- Add loading message -->
-    <button id="start-game" style="display: none;">Start Game</button>
+    <div style="position: relative;">
+      <p id="loading-message">Loading data...</p> <!-- Add loading message -->
+      <!-- <button id="start-game" style="display: none;">Start Game</button> -->
+      <button id="start-game" disabled>Start Game</button>
+      <!-- <button id="start-game" style="opacity: 0.5">Start Game</button> -->
+
+
+    </div>
     <div id="game-container" class="game-container">
       <p id="game-container-text">You will learn the words here</p>
       <div id="card-container" class="card-container"></div>

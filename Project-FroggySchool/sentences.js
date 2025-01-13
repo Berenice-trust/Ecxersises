@@ -5,9 +5,28 @@ let sentences = [];
 let currentIndex = 0;
 let correctOrder = [];
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
     const startGameButton = document.getElementById('start-game');
     startGameButton.addEventListener('click', startGame);
+
+    // Show loading message initially
+    const loadingMessage = document.getElementById('loading-message');
+    loadingMessage.style.display = 'block';
+    startGameButton.disabled = true; // Disable the start game button initially
+
+    await dictionaryStorage.initializeStorage(); // Wait for storage initialization
+    await loadSentences(); // Load sentences when the page is loaded
+
+    // Show start game button if sentences are loaded
+    if (sentences.length > 0) {
+        startGameButton.disabled = false; // Enable the start game button
+        startGameButton.style.display = 'block'; // Ensure the button is visible
+        if (loadingMessage) {
+            loadingMessage.style.display = 'none'; // Hide loading message
+        }
+    } else {
+        document.getElementById('game-container').innerHTML = '<p>No valid sentences available for the selected category. Please choose another category.</p>';
+    }
 });
 
 async function startGame() {
@@ -20,7 +39,6 @@ async function startGame() {
     gameContainer.style.height = 'auto';
     gameContainer.style.opacity = '1';
 
-    await loadSentences();
     currentIndex = 0;
     showNextSentence();
 }

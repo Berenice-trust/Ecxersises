@@ -83,6 +83,10 @@ export function listWords(category = '', page = 1) {
     updateCategoryFilter();
     isLoading = false; // Reset loading flag
     hideLoadingSpinner(); // Hide loading spinner
+    const loadingMessage = document.getElementById('loading-message');
+    if (loadingMessage) {
+        loadingMessage.style.display = 'none'; // Hide loading message
+    }
 }
 
 // Function to create a card element

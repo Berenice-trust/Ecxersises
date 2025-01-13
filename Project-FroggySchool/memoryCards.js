@@ -4,7 +4,7 @@ const dictionaryStorage = new DictionaryStorage('dictionaryStorage');
 let words = [];
 let currentIndex = 0;
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
     const startGameButton = document.getElementById('start-game');
     startGameButton.addEventListener('click', startGame);
 
@@ -13,6 +13,10 @@ document.addEventListener('DOMContentLoaded', () => {
     // Show loading message initially
     const loadingMessage = document.getElementById('loading-message');
     loadingMessage.style.display = 'block';
+    startGameButton.disabled = true; // Disable the start game button initially
+
+    await dictionaryStorage.initializeStorage(); // Wait for storage initialization
+    loadWords(); // Load words when the page is loaded
 });
 
 async function startGame() {
@@ -35,8 +39,6 @@ async function startGame() {
     const gameContainerText = document.getElementById('game-container-text');
     gameContainerText.textContent = 'Do you know the translation of this word?';
 
-    await loadWords();
-    
     currentIndex = 0;
     showNextCard();
 }
@@ -57,9 +59,14 @@ async function loadWords() {
     }).filter(word => word.word);
 
     // Show start game button if words are loaded
+    const loadingMessage = document.getElementById('loading-message');
+    const startGameButton = document.getElementById('start-game');
     if (words.length > 0) {
-        document.getElementById('start-game').style.display = 'block';
-        document.getElementById('loading-message').innerHTML = '';
+        startGameButton.disabled = false; // Enable the start game button
+        startGameButton.style.display = 'block'; // Ensure the button is visible
+        if (loadingMessage) {
+            loadingMessage.style.display = 'none'; // Hide loading message
+        }
     } else {
         document.getElementById('game-container-text').textContent = 'No words available for the selected category.';
     }

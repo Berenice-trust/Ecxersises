@@ -1,4 +1,3 @@
-
 :root {
   --primary-color: #007bff;
   --primary-color-hover: #0056b3;
@@ -629,4 +628,15 @@ li {
   display: flex;
   justify-content: center; /* Center the card within the list item */
   width: 100%; /* Ensure the list item takes full width */
+}
+
+#loading-message {
+  position: absolute;
+  top: 75%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: var(--font-size-medium);
+  color: var(--primary-color);
+  text-align: center;
+  width: 100%;
 }
