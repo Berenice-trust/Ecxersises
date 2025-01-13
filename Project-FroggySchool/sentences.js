@@ -39,6 +39,8 @@ async function startGame() {
     gameContainer.style.height = 'auto';
     gameContainer.style.opacity = '1';
 
+    await loadSentences(); // Reload sentences based on the selected category
+
     currentIndex = 0;
     showNextSentence();
 }

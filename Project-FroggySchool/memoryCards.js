@@ -37,7 +37,10 @@ async function startGame() {
     cardContainer.style.opacity = '1';
 
     const gameContainerText = document.getElementById('game-container-text');
+    gameContainerText.style.display = 'block';
     gameContainerText.textContent = 'Do you know the translation of this word?';
+
+    await loadWords(); // Reload words based on the selected category
 
     currentIndex = 0;
     showNextCard();
@@ -74,6 +77,7 @@ async function loadWords() {
 
 function showNextCard() {
     const cardContainer = document.getElementById('card-container');
+    const gameContainerText = document.getElementById('game-container-text');
 
     if (words.length === 0) {
         cardContainer.innerHTML = '<p>No valid words available for the selected category. Please choose another category.</p>';
@@ -83,7 +87,15 @@ function showNextCard() {
     }
 
     if (currentIndex >= words.length) {
-        currentIndex = 0;
+        gameContainerText.style.display = 'none';
+        const gameContainer = document.getElementById('game-container');
+        gameContainer.style.height = 'auto'; // Adjust the height to fit the content
+        cardContainer.style.height = 'auto'; // Adjust the height to fit the content
+        cardContainer.innerHTML = '<p>Congratulations, you have reviewed all words!</p><button id="reset-game">Reset</button>';
+        document.getElementById('reset-game').addEventListener('click', startGame);
+        document.getElementById('know-word').style.display = 'none';
+        document.getElementById('dont-know-word').style.display = 'none';
+        return;
     }
 
     const wordData = words[currentIndex];
@@ -142,10 +154,16 @@ function handleKnowWord() {
         words = words.filter(word => !word.known);
     }
     const cardContainer = document.getElementById('card-container');
+    const gameContainerText = document.getElementById('game-container-text');
     if (words.length === 0) {
-        cardContainer.innerHTML = '<p>Congratulations, you have reviewed all words!</p>';
+        cardContainer.innerHTML = '<p>Congratulations, you have reviewed all words!</p><button id="reset-game">Reset</button>';
+        document.getElementById('reset-game').addEventListener('click', startGame);
         document.getElementById('know-word').style.display = 'none';
         document.getElementById('dont-know-word').style.display = 'none';
+        gameContainerText.style.display = 'none';
+        const gameContainer = document.getElementById('game-container');
+        gameContainer.style.height = 'auto'; // Adjust the height to fit the content
+        cardContainer.style.height = 'auto'; // Adjust the height to fit the content
     } else {
         currentIndex++;
         showNextCard();
